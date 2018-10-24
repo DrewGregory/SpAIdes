@@ -43,6 +43,7 @@ class Human(Player):
         chosenIndex = int(input("Which card do you want to play?"))
         # Remove card from hand
         self.hand = filter(lambda x: x.index != actions[chosenIndex].index, self.hand)
+        print(" ")
         return actions[chosenIndex]
 
         
