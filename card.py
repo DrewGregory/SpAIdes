@@ -16,16 +16,16 @@ class Card:
         Print out card in human-readable format
         """
         num = self.index % 13
-        if num == 0:
-            num = "A"
-        elif num == '10':
+        if num == 9:
             num = "J"
-        elif num == "11":
+        elif num == 10:
             num = "Q"
-        elif num == "12":
+        elif num == 11:
             num = "K"
+        elif num == 12:
+            num = "A"
         else:
-            num = str(num)
+            num = str(num + 2)
         suit = self.index/13
         if suit == 0:
             suit = "♠"

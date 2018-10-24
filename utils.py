@@ -12,4 +12,11 @@ def genActions(hand, pile):
     return actions
 
 def determineWinCardIndex(pile):
-    
+    bestCard = (pile[0], 0)
+    for i in range(1, 4):
+        bestCardSuit = bestCard.index/13
+        cardSuit = pile[i].index/13
+        if (bestCardSuit == cardSuit and pile[i].index > bestCard.index) or \
+            (cardSuit == 0 and pile[i].index > bestCard.index % 13):
+            bestCard = (pile[i], i)
+    return bestCard[1]
