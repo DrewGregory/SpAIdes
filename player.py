@@ -39,6 +39,7 @@ class Human(Player):
         print("Pile: "+ str(pile))
         print("Possible Cards: " + str(actions))
         # TODO: print indices underneath card list
+        print(self.claimed)
         print("Tricks so far: %d \t Bid: %d" % (len(self.claimed)/4, self.bid))
         chosenIndex = int(input("Which card do you want to play?"))
         # Remove card from hand

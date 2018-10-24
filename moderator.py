@@ -28,7 +28,8 @@ while max((499,) + tuple([player.score for player in players])) == 499:
             actions = genActions(player.hand, pile)
             pile.append(player.playCard(actions, pile))
         winIndex = (playerCursor + determineWinCardIndex(pile)) % 4
-        players[winIndex].claimed.add(tuple(pile))
-        playerCursor = (roundCursor + playerCursor + winIndex) % 4
+        for card in pile:
+            players[winIndex].claimed.add(card)
+        playerCursor = (playerCursor + winIndex) % 4
         
 
