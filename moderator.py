@@ -30,6 +30,6 @@ while max((499,) + tuple([player.score for player in players])) == 499:
         winIndex = (playerCursor + determineWinCardIndex(pile)) % 4
         for card in pile:
             players[winIndex].claimed.add(card)
-        playerCursor = (playerCursor + winIndex) % 4
+        playerCursor = (playerCursor + winIndex - 1) % 4
         
 
