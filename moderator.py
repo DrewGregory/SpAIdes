@@ -37,6 +37,5 @@ while max((499,) + tuple([player.score for player in players])) == 499:
     # Calculate scores
     for player in players:
         player.calculateScore()
-        print(player.name + " score: " + str(player.score))
 
 

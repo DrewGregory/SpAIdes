@@ -18,6 +18,7 @@ class Player:
         self.score = 0
         self.bid = 0
         self.name = name
+        self.bags = 0
 
     def declareBid(self):
         raise NotImplementedError("declareBid not implemented")
@@ -31,8 +32,10 @@ class Player:
             self.score += 10 * (tricks - self.bid)
         else:
             self.score += 10 * self.bid + (tricks - self.bid)
-        print("Bid: " + str(self.bid))
-        print("Claimed: " + str(self.claimed))
+            self.bags += (tricks - self.bid)
+            while self.bags >= 10:
+                self.score -= 100
+                self.bags -= 10
         print(self.name + " score: " + str(self.score))
         # Reset round state
         self.hand = []
@@ -54,7 +57,7 @@ class Human(Player):
         # TODO: print indices underneath card list
         print(self.claimed)
         print("Tricks so far: %d \t Bid: %d" % (len(self.claimed)/4, self.bid))
-        chosenIndex = int(input("Which card do you want to play?"))
+        chosenIndex = int(input("Which card do you want to play (Index)?"))
         # Remove card from hand
         self.hand = filter(lambda x: x.index != actions[chosenIndex].index, self.hand)
         print(" ")
