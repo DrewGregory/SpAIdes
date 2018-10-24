@@ -25,6 +25,19 @@ class Player:
     def playCard(self, actions, pile=None):
         raise NotImplementedError("playCard not implemented")
 
+    def calculateScore(self):
+        tricks = len(self.claimed) / 4
+        if tricks < self.bid:
+            self.score += 10 * (tricks - self.bid)
+        else:
+            self.score += 10 * self.bid + (tricks - self.bid)
+        print("Bid: " + str(self.bid))
+        print("Claimed: " + str(self.claimed))
+        print(self.name + " score: " + str(self.score))
+        # Reset round state
+        self.hand = []
+        self.claimed = set()
+        self.bid = 0
     
 class Human(Player):
 

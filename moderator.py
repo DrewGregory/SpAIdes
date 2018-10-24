@@ -21,15 +21,22 @@ while max((499,) + tuple([player.score for player in players])) == 499:
         players[i].hand = deck[i * 13 : (i + 1) * 13]
         players[i].declareBid()
     playerCursor = (roundCursor + 1) % 4 # left of dealer
+    brokeSpades = False
     while sum([len(p.hand) for p in players]) > 0:
         pile = []
         for i in range(0, len(players)):
             player = players[(playerCursor + i) % len(players)]
-            actions = genActions(player.hand, pile)
+            actions = genActions(player.hand, pile, brokeSpades)
             pile.append(player.playCard(actions, pile))
         winIndex = (playerCursor + determineWinCardIndex(pile)) % 4
         for card in pile:
+            if card.index / 13 == 0:
+                brokeSpades = True
             players[winIndex].claimed.add(card)
         playerCursor = (playerCursor + winIndex - 1) % 4
-        
+    # Calculate scores
+    for player in players:
+        player.calculateScore()
+        print(player.name + " score: " + str(player.score))
+
 
