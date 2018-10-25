@@ -1,4 +1,7 @@
 import random
+from card import Card
+
+
 class Player:
     """
     State:
@@ -11,6 +14,10 @@ class Player:
         - Bid
         - Play Card
     """
+
+    # SCORING CONSTANTS
+    USE_BAGS = True
+
     def __init__(self, hand, name=""):
         # TODO
         self.hand = hand
@@ -25,13 +32,16 @@ class Player:
         raise NotImplementedError("declareBid not implemented")
 
     def removeCard(self, card):
-        self.hand = [x for x in self.hand if x.index != card.index]
+        if card in self.hand:
+            self.hand = [x for x in self.hand if x.index != card.index]
+            return True
+        else:
+            return False
 
     def playCard(self, actions, pile=None):
         raise NotImplementedError("playCard not implemented")
 
-    def calculateScore(self):
-        tricks = len(self.claimed) / 4
+    def regressionScore(self, tricks):
         subScore = 0
         if tricks < self.bid:
             subScore = 10 * (tricks - self.bid)
@@ -41,6 +51,11 @@ class Player:
             while self.bags >= 10:
                 subScore -= 100
                 self.bags -= 10
+        return subScore
+
+    def calculateScore(self, scoreFunction=regressionScore):
+        tricks = len(self.claimed) / 4
+        subScore = scoreFunction(self, tricks)
         # Reset round state
         self.hand = []
         self.claimed = set()
@@ -95,7 +110,7 @@ class Baseline(Player):
 
 class Idiot(Player):
     def declareBid(self):
-        return random.choice([i for i in range(0, 14)])
+        return random.choice([i for i in range(Card.NUM_CARDS)])
     
     def playCard(self, actions, pile):
         card = random.choice(actions)
