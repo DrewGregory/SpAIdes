@@ -4,17 +4,17 @@ from random import shuffle
 from game import Game
 from statistics import mean
 
-
 class Moderator:
 
-
     def __init__(self):
+                
         self.deck = ([Card(i) for i in range(0, 52)])
         shuffle(self.deck)
         self.players = [Idiot([], "Idiot " + str(i + 1))  for i in range(0, 3)]
         self.players.append(Baseline([], "Baseline"))
 
     def playGame(self):
+
         """
         Rounds go as follows:
         1) Rotate positions of players
@@ -41,14 +41,20 @@ class Moderator:
                     pile.append(player.playCard(actions, pile))
                 winIndex = (playerCursor + Game.determineWinCardIndex(pile)) % 4
                 for card in pile:
-                    if card.index / 13 == 0:
+                    if card.index // 13 == 0:
                         brokeSpades = True
                     self.players[winIndex].claimed.add(card)
                 playerCursor = (playerCursor + winIndex - 1) % 4
             # Calculate scores
             print("SCORES:")
             print("--------")
-            avgScoreDifferential = mean([0])
-            for player in self.players:
-                player.calculateScore()
+            avgIdiotScore = mean([x.calculateScore() for x in self.players if "Idiot" in x.name])
+            avgBaselineScore = mean([x.calculateScore() for x in self.players if "Baseline" in x.name])
+            avgScoreDifferential.append(avgBaselineScore - avgIdiotScore)
+            
+
+
+        print(mean(avgScoreDifferential))
+
+
 

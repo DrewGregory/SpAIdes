@@ -41,27 +41,27 @@ class Player:
     def playCard(self, actions, pile=None):
         raise NotImplementedError("playCard not implemented")
 
-    
     def regressionScore(self, tricks):
+        subScore = 0
         if tricks < self.bid:
-            self.score += 10 * (tricks - self.bid)
+            subScore = 10 * (tricks - self.bid)
         else:
-            self.score += 10 * self.bid + (tricks - self.bid)
+            subScore = 10 * self.bid + (tricks - self.bid)
             self.bags += (tricks - self.bid)
-            if Player.USE_BAGS:
-                while self.bags >= 10:
-                    self.score -= 100
-                    self.bags -= 10    
+            while self.bags >= 10:
+                subScore -= 100
+                self.bags -= 10
 
     def calculateScore(self, scoreFunction=regressionScore):
-            tricks = len(self.claimed) / 4
-            scoreFunction(self, tricks)
-            print(self.name + " score: " + str(self.score))
-            # Reset round state
-            self.hand = []
-            self.claimed = set()
-            self.bid = 0
-
+        tricks = len(self.claimed) / 4
+        subScore = scoreFunction(self, tricks)
+        # Reset round state
+        self.hand = []
+        self.claimed = set()
+        self.bid = 0
+        self.score += subScore
+        print(self.name + " score: " + str(self.score))
+        return subScore
 
 class Human(Player):
 
