@@ -101,3 +101,6 @@ class Idiot(Player):
         card = random.choice(actions)
         self.removeCard(card)
         return card
+
+class Oracle(Player):
+    pass
