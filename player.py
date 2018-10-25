@@ -118,4 +118,9 @@ class Idiot(Player):
         return card
 
 class Oracle(Player):
-    pass
+    def declareBid(self, state):
+        #TODO Change this
+        return 3
+    
+    def playCard(self, state, actions, pile):
+        pass

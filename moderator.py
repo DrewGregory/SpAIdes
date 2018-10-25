@@ -6,12 +6,15 @@ from statistics import mean
 
 class Moderator:
 
-    def __init__(self):
+    def __init__(self, args):
                 
         self.deck = ([Card(i) for i in range(Card.NUM_CARDS)])
         shuffle(self.deck)
         self.players = [Idiot([], "Idiot " + str(i + 1))  for i in range(0, Game.NUM_PLAYERS - 1)]
-        self.players.append(Human([], "Baseline"))
+        if args.human:
+            self.players.append(Human([], "Human"))
+        else: 
+            self.players.append(Baseline([], "Baseline"))
         self.pile = []
 
 
