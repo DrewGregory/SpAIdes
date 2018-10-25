@@ -53,4 +53,3 @@ class Moderator:
         print(mean(avgScoreDifferential))
 
 
-
