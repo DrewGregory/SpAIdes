@@ -5,7 +5,7 @@ class Card:
     NUM_SUITS = 4
     NUM_CARDS = 52
     NUM_PER_SUIT = 13
-    SPADES_SUIT = 3
+    SPADES_SUIT = 0
     def __init__(self, index):
         """ 
         Indices: 0 - 12 -> Ace thru King of Spades
