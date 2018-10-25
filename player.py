@@ -131,23 +131,35 @@ class Oracle(Player):
         Otherwise return a pair of True, and the lowest card that can beat the other player's
         best play. '''
         otherSpades = filter(lambda x: x.getSuit() == 0, otherActions)
+        otherSuit = filter(lambda x: x.getSuit() == suit, otherActions)
         mySpades = filter(lambda x: x.getSuit() == 0, actions)
-        mySuit = filter(lambda x: x.getSuit() == suit)
+        ## mySuit == actions or [] by the rules of the game
+        mySuit = filter(lambda x: x.getSuit() == suit, actions)
+        if len(mySpades) == 0 and len(mySuit) == 0:
+            #I have no card that can win
+            return None
         if(len(otherSpades) > 0):
-            #Both can play spades
+            #Opponent can play spades
             if len(mySpades) == 0:
+                #I can't play spades
                 return None
-            oppBest = max(otherSpades)
-            myBest = max(filter(lambda x: x<= 12, actions))
+            oppBest = max(otherSpades, key = lambda x: x.getValue())
+            myBest = max(mySpades, key = lambda x: x.getValue())
             if(oppBest > myBest):
+                #opponent has better spade
                 return None
-            return min(filter(lambda x: x > oppBest, actions))
-        if min(actions) <= 12:
+            #Return least card that wins
+            return min(filter(lambda x: x.getValue() > oppBest.getValue(), actions))
+        if len(otherSuit) == 0 and len(mySuit) > 0:
+            ##Other dude has no cards that can take the trick
+            return min(actions, key = lambda x: x.getValue())
+        if len(mySpades) > 0:
             #I can play spades and opponent can't
-            return min(actions)
-        oppBest = max(otherActions)
-        myBest = max(actions)
-        if(oppBest > myBest):
+            #Implicitly I can't play in suit
+            return min(mySpades, key = lambda x: x.getValue())
+        oppBest = max(otherActions, key = lambda x: x.getValue())
+        myBest = max(actions, key = lambda x: x.getValue())
+        if(oppBest.getValue() > myBest.getValue()):
             #Both of us are in suit, he has higher card
             return None
         return min(filter(lambda x: x > oppBest, actions))
