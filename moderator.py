@@ -10,7 +10,7 @@ class Moderator:
     def __init__(self, args):
         self.deck = ([Card(i) for i in range(Card.NUM_CARDS)])
         shuffle(self.deck)
-        self.players = [Idiot([], "AI Baseline " + str(i + 1))  for i in range(0, Game.NUM_PLAYERS - 1)]
+        self.players = [Baseline([], "AI Baseline " + str(i + 1))  for i in range(0, Game.NUM_PLAYERS - 1)]
         if args.human:
             self.players.append(Human([], "Human"))
         elif args.oracle:
@@ -57,7 +57,8 @@ class Moderator:
         """
         avgScoreDifferential = []
 
-        while max((Game.END_SCORE,) + tuple([player.score for player in self.players])) == Game.END_SCORE:
+        # while max((Game.END_SCORE,) + tuple([player.score for player in self.players])) == Game.END_SCORE:
+        for _ in range(5000):
             self.roundCursor = 0
             shuffle(self.deck)
             for i in range(0, len(self.players)):
@@ -82,8 +83,8 @@ class Moderator:
             # Calculate scores
             print("SCORES:")
             print("--------")
-            bestScore = max([x.calculateScore() for x in self.players if "AI" in x.name])
-            testScore = ([x.calculateScore() for x in self.players if "Test" in x.name])[0]
+            bestScore = mean([x.calculateScore() for x in self.players if "AI" in x.name])
+            testScore = ([x.calculateScore() for x in self.players if "Oracle" in x.name])[0]
             print(testScore - bestScore)
             avgScoreDifferential.append(testScore - bestScore)
         print(mean(avgScoreDifferential))

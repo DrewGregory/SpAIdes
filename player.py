@@ -17,7 +17,7 @@ class Player:
 
     # SCORING CONSTANTS
     USE_BAGS = True
-    BAGGING_COST = 0
+    BAGGING_COST = 100
 
     def __init__(self, hand, name=""):
         # TODO
@@ -125,12 +125,12 @@ class Idiot(Player):
 class Oracle(Player):
     def declareBid(self, state):
         # Let number of cards above jack be our bid #.
-        print("Dealt hand: " + str(self.hand))
+        # print("Dealt hand: " + str(self.hand))
         for card in self.hand:
             if card.index % 13 >= 10:
-                print(card)
+                # print(card)
                 self.bid += 1
-        print("Bid: " + str(self.bid))
+        # print("Bid: " + str(self.bid))
         return self.bid
 
     def canBeat(self, actions, otherActions, suit):
@@ -172,11 +172,32 @@ class Oracle(Player):
         return min(filter(lambda x: x.getValue() > oppBest.getValue(), actions), key= lambda x: x.getValue())
 
     def playCard(self, state, actions, pile):
+        if(len(self.claimed)//4 == self.bid):
+            return self.playWorst(actions)
         if(len(pile) == 0):
             #TODO Decide how to play first card
-            card = random.choice(actions)
-            self.removeCard(card)
-            return card
+            for i in range(4):
+                card = max(filter(lambda x: x.getSuit() == i, actions), default = None, key = lambda x: x.getValue())
+                if(card is None):
+                    continue
+                play = True
+                for j in range(1,4):
+                    playerHand = state[0][i]
+                    playerActions = Game.genActions(playerHand, [card], True)
+                    maxP = max(filter(lambda x: x.getSuit() == i, playerActions),
+                        default = None, key = lambda x: x.getValue())
+                    if maxP is None:
+                        if i > 0 and len([x for x in playerActions if x.getSuit() == 0]):
+                            play = False
+                            break
+                    else:
+                        if maxP.getValue() > card.getValue():
+                            play = False
+                            break
+                if(play):
+                    self.removeCard(card)
+                    return card
+            return self.playWorst(actions)
         suit = pile[0].getSuit()
         numPlayed = len(pile)
         #bestCard will be the max of the mins -- the least card I can play which will beat everyone
