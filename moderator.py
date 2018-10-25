@@ -8,10 +8,11 @@ class Moderator:
 
     def __init__(self):
                 
-        self.deck = ([Card(i) for i in range(0, 52)])
+        self.deck = ([Card(i) for i in range(Card.NUM_CARDS)])
         shuffle(self.deck)
-        self.players = [Idiot([], "Idiot " + str(i + 1))  for i in range(0, 3)]
+        self.players = [Idiot([], "Idiot " + str(i + 1))  for i in range(Game.NUM_PLAYERS - 1)]
         self.players.append(Baseline([], "Baseline"))
+
 
     def playGame(self):
 
@@ -25,7 +26,7 @@ class Moderator:
 
         avgScoreDifferential = []
 
-        while max((499,) + tuple([player.score for player in self.players])) == 499:
+        while max((Game.END_SCORE,) + tuple([player.score for player in self.players])) == Game.END_SCORE:
             roundCursor = 0
             shuffle(self.deck)
             for i in range(0, len(self.players)):
@@ -51,9 +52,6 @@ class Moderator:
             avgIdiotScore = mean([x.calculateScore() for x in self.players if "Idiot" in x.name])
             avgBaselineScore = mean([x.calculateScore() for x in self.players if "Baseline" in x.name])
             avgScoreDifferential.append(avgBaselineScore - avgIdiotScore)
-            
-
-
         print(mean(avgScoreDifferential))
 
 
