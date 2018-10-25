@@ -129,17 +129,24 @@ class Oracle(Player):
         otherSpades = filter(lambda x: x.getSuit() == 0, otherActions)
         mySpades = filter(lambda x: x.getSuit() == 0, actions)
         mySuit = filter(lambda x: x.getSuit() == suit)
+        if len(mySpades) == 0 and len(mySuit) == 0:
+            #I have no card that can win
+            return None
         if(len(otherSpades) > 0):
-            #Both can play spades
+            #Opponent can play spades
             if len(mySpades) == 0:
+                #I can't play spades
                 return None
-            oppBest = max(otherSpades)
-            myBest = max(filter(lambda x: x<= 12, actions))
+            oppBest = max(otherSpades, key = lambda x: x.getValue())
+            myBest = max(mySpades, key = lambda x: x.getValue())
             if(oppBest > myBest):
+                #opponent has better spade
                 return None
-            return min(filter(lambda x: x > oppBest, actions))
-        if min(actions) <= 12:
+            #Return least card that wins
+            return min(filter(lambda x: x.getValue() > oppBest.getValue(), actions))
+        if len(mySpades) > 0:
             #I can play spades and opponent can't
+            #Implicitly I can't play in suit
             return min(actions)
         oppBest = max(otherActions)
         myBest = max(actions)
