@@ -22,7 +22,6 @@ class Moderator:
 
     def getPlayerGameState(self, player, playerCursor):
         oracleGameState = self.getOracleGameState(playerCursor)
-
         # Remove other player hands...
         # replace with just our player's hand
         if False and not player.name == "Oracle": # @GriffinKardos...when you make your oracle class change this
