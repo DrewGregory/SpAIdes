@@ -37,12 +37,8 @@ class Game:
         for i in range(1, len(pile)):
             bestCardSuit = (bestCard[0].index // 13)
             cardSuit = (pile[i].index // 13)
-            print(bestCardSuit)
-            print(cardSuit)
             if (bestCardSuit == cardSuit and pile[i].index > bestCard[0].index) or \
                 (bestCardSuit != 0 and cardSuit == 0):
-                print(bestCard)
-                print("new card: " + str(pile[i]))
                 bestCard = (pile[i], i)
         print("Out of " + str(pile) + " Best card: " + str(bestCard[0]))
         return bestCard[1]
