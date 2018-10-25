@@ -9,15 +9,15 @@ def genActions(hand, pile, brokeSpades):
     if len(pile) == 0:
         allCardsSpades = True
         for card in hand:
-            if card.index / 13 != 0:
+            if card.index // 13 != 0:
                 allCardsSpades = False
         if brokeSpades or allCardsSpades:
             return hand
         else:
-            return [x for x in hand if x.index /13 > 0]
-    bottomSuit = pile[0].index / 13
+            return [x for x in hand if x.index // 13 > 0]
+    bottomSuit = pile[0].index // 13
     for card in hand:
-        suit = card.index / 13
+        suit = card.index // 13
         if suit == bottomSuit:
             actions.append(card)
     if len(actions) == 0:
@@ -27,10 +27,14 @@ def genActions(hand, pile, brokeSpades):
 def determineWinCardIndex(pile):
     bestCard = (pile[0], 0)
     for i in range(1, len(pile)):
-        bestCardSuit = bestCard[0].index/13
-        cardSuit = pile[i].index/13
+        bestCardSuit = (bestCard[0].index // 13)
+        cardSuit = (pile[i].index // 13)
+        print(bestCardSuit)
+        print(cardSuit)
         if (bestCardSuit == cardSuit and pile[i].index > bestCard[0].index) or \
             (bestCardSuit != 0 and cardSuit == 0):
+            print(bestCard)
+            print("new card: " + str(pile[i]))
             bestCard = (pile[i], i)
     print("Out of " + str(pile) + " Best card: " + str(bestCard[0]))
     return bestCard[1]
