@@ -1,10 +1,14 @@
-from player import Human, Baseline
+from player import Human, Baseline, Idiot
 from card import Card
 from random import shuffle
 from utils import genActions, determineWinCardIndex
+from statistics import mean
+
+
 deck = ([Card(i) for i in range(0, 52)])
 shuffle(deck)
-players = [Baseline([], "Baseline " + str(i)) for i in range(0, 4)]
+players = [Idiot([], "Idiot " + str(i + 1))  for i in range(0, 3)]
+players.append(Baseline([], "Baseline"))
 
 """
 Rounds go as follows:
@@ -13,6 +17,8 @@ Rounds go as follows:
 3) Ask each player for bid
 4) Play hands until out of cards
 """
+
+avgScoreDifferential = []
 
 while max((499,) + tuple([player.score for player in players])) == 499:
     roundCursor = 0
@@ -37,6 +43,7 @@ while max((499,) + tuple([player.score for player in players])) == 499:
     # Calculate scores
     print("SCORES:")
     print("--------")
+    avgScoreDifferential = mean()
     for player in players:
         player.calculateScore()
 

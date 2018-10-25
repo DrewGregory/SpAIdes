@@ -88,3 +88,13 @@ class Baseline(Player):
             card = actions[chosenIndex]
         self.removeCard(card)
         return card
+
+
+class Idiot(Player):
+    def declareBid(self):
+        return random.choice([i for i in range(0, 14)])
+    
+    def playCard(self, actions, pile):
+        card = random.choice(actions)
+        self.removeCard(card)
+        return card
