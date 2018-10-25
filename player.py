@@ -1,6 +1,6 @@
 import random
 from card import Card
-
+from game import Game
 
 class Player:
     """
@@ -87,12 +87,16 @@ class Human(Player):
 class Baseline(Player):
     def declareBid(self, state):
         # Let number of cards above jack be our bid #.
+        print("Dealt hand: " + str(self.hand))
         for card in self.hand:
-            if card.index % 13 > 10:
+            if card.index % 13 >= 10:
+                print(card)
                 self.bid += 1
+        print("Bid: " + str(self.bid))
         return self.bid
 
     def playCard(self, state, actions, pile):
+        print(state)
         print(str(self.hand) + " actions: " + str(actions))
         card = None
         if len(pile) == 0:
@@ -110,7 +114,9 @@ class Baseline(Player):
 
 class Idiot(Player):
     def declareBid(self, state):
-        return random.choice([i for i in range(Card.NUM_CARDS)])
+        choice = random.choice([i for i in range(Card.NUM_CARDS// Game.NUM_PLAYERS  + 1)])
+        self.bid = choice
+        return choice
     
     def playCard(self, state, actions, pile):
         card = random.choice(actions)
