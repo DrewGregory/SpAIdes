@@ -1,44 +1,45 @@
-
+from card import Card
+from random import shuffle
+from player import Human, Baseline, Idiot, Oracle
 class Game:
 
     END_SCORE = 500 - 1
     NUM_PLAYERS = 4
 
-    @staticmethod
-    def genActions(hand, pile, brokeSpades):
-        """
-        Given a player's hand and the pile of cards in the center, generate a list of possible cards the player can
-        play.
-        If user has cards of  that suit, only show cards of that suit. Otherwise, give anything.
-        """
-        actions = []
+    def __init__(self, args):
+        self.deck = ([Card(i) for i in range(Card.NUM_CARDS)])
+        shuffle(self.deck)
+        self.players = [Baseline([], "AI Baseline " + str(i + 1))  for i in range(0, Game.NUM_PLAYERS - 1)]
+        if args.human:
+            self.players.append(Human([], "Human"))
+        elif args.oracle:
+            self.players.append(Oracle([], "Oracle"))
+        else: 
+            self.players.append(Baseline([], "Test"))
+        self.pile = []
 
-        if len(pile) == 0:
-            allCardsSpades = True
-            for card in hand:
-                if card.index // 13 != 0:
-                    allCardsSpades = False
-            if brokeSpades or allCardsSpades:
-                return hand
-            else:
-                return [x for x in hand if x.index // 13 > 0]
-        bottomSuit = pile[0].index // 13
-        for card in hand:
-            suit = card.index // 13
-            if suit == bottomSuit:
-                actions.append(card)
-        if len(actions) == 0:
-            return hand
-        return actions
 
-    @staticmethod
-    def determineWinCardIndex(pile):
-        bestCard = (pile[0], 0)
-        for i in range(1, len(pile)):
-            bestCardSuit = (bestCard[0].index // 13)
-            cardSuit = (pile[i].index // 13)
-            if (bestCardSuit == cardSuit and pile[i].index > bestCard[0].index) or \
-                (bestCardSuit != 0 and cardSuit == 0):
-                bestCard = (pile[i], i)
-        #print("Out of " + str(pile) + " Best card: " + str(bestCard[0]))
-        return bestCard[1]
+    def getPlayerGameState(self, player, playerCursor):
+        oracleGameState = self.getOracleGameState(playerCursor)
+        # Remove other player hands...
+        # replace with just our player's hand
+        if False and not player.name == "Oracle": # @GriffinKardos...when you make your oracle class change this
+            oracleGameState[0] = player.hand
+        return oracleGameState
+
+    def getOracleGameState(self, playerCursor):
+        """
+        Get interesting state related to round.
+        For the three rays, the 0 index is yourself, each successive element follows
+        the ordering around the table clockwise.
+        """
+        playerHands = []
+        playerClaimedCards = []
+        playerBids = []
+        for i in range(0, len(self.players)):
+            player = self.players[(playerCursor + i) % 4]
+            playerHands.append(player.hand)
+            playerClaimedCards.append(player.claimed)
+            playerBids.append(player.bid)
+        
+        return [playerHands, playerClaimedCards, playerBids, self.pile]

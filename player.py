@@ -1,6 +1,6 @@
 import random
 from card import Card
-from game import Game
+from utils import genActions, determineWinCardIndex
 
 class Player:
     """
@@ -88,12 +88,9 @@ class Human(Player):
 class Baseline(Player):
     def declareBid(self, state):
         # Let number of cards above jack be our bid #.
-        print("Dealt hand: " + str(self.hand))
         for card in self.hand:
             if card.index % 13 >= 10:
-                print(card)
                 self.bid += 1
-        print("Bid: " + str(self.bid))
         return self.bid
 
     def playCard(self, state, actions, pile):
@@ -125,12 +122,9 @@ class Idiot(Player):
 class Oracle(Player):
     def declareBid(self, state):
         # Let number of cards above jack be our bid #.
-        # print("Dealt hand: " + str(self.hand))
         for card in self.hand:
             if card.index % 13 >= 10:
-                # print(card)
                 self.bid += 1
-        # print("Bid: " + str(self.bid))
         return self.bid
 
     def canBeat(self, actions, otherActions, suit):
@@ -183,7 +177,7 @@ class Oracle(Player):
                 play = True
                 for j in range(1,4):
                     playerHand = state[0][i]
-                    playerActions = Game.genActions(playerHand, [card], True)
+                    playerActions = genActions(playerHand, [card], True)
                     maxP = max(filter(lambda x: x.getSuit() == i, playerActions),
                         default = None, key = lambda x: x.getValue())
                     if maxP is None:
@@ -201,7 +195,7 @@ class Oracle(Player):
         suit = pile[0].getSuit()
         numPlayed = len(pile)
         #bestCard will be the max of the mins -- the least card I can play which will beat everyone
-        bestCard = pile[Game.determineWinCardIndex(pile)]
+        bestCard = pile[determineWinCardIndex(pile)]
         better = list(filter(lambda x: x.getSuit() == bestCard.getSuit() and x.getValue()>bestCard.getValue(), actions))
         if(len(better) == 0):
             if(bestCard.getSuit() == 0):
@@ -215,7 +209,7 @@ class Oracle(Player):
         for i in range(numPlayed + 1, len(state[0])):
             #The players are already in the order that they play
             playerHand = state[0][i]
-            playerActions = Game.genActions(playerHand, pile, True)
+            playerActions = genActions(playerHand, pile, True)
             nextBest = self.canBeat(actions, playerActions, suit)
             if(nextBest == None):
                 return self.playWorst(actions)
