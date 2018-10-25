@@ -22,34 +22,35 @@ class Moderator:
         self.roundCursor = 0
         # while max((Game.END_SCORE,) + tuple([player.score for player in self.players])) == Game.END_SCORE:
         for _ in range(5000):
+            # Initialize round
             shuffle(self.game.deck)
-            for i in range(0, len(self.game.players)):
+            for i in range(self.game.NUM_PLAYERS):
                 self.game.players[i].hand = self.game.deck[i * 13 : (i + 1) * 13]
                 playerState = self.game.getPlayerGameState(self.game.players[i], i)
                 self.game.players[i].declareBid(playerState)
-            self.playerCursor = (self.roundCursor + 1) % 4 # left of dealer
+            self.playerCursor = (self.roundCursor + 1) % self.game.NUM_PLAYERS # left of dealer
             brokeSpades = False
+
+            # Play round through to completion
             while sum([len(p.hand) for p in self.game.players]) > 0:
                 self.game.pile = []
-                for i in range(0, len(self.game.players)):
-                    player = self.game.players[(self.playerCursor + i) % len(self.game.players)]
+                for i in range(self.game.NUM_PLAYERS):
+                    player = self.game.players[(self.playerCursor + i) % self.game.NUM_PLAYERS]
                     actions = genActions(player.hand, self.game.pile, brokeSpades)
                     playerState = self.game.getPlayerGameState(player, self.playerCursor + i)
                     self.game.pile.append(player.playCard(playerState, actions, self.game.pile))
-                winIndex = (self.playerCursor + determineWinCardIndex(self.game.pile)) % 4
+                winIndex = (self.playerCursor + determineWinCardIndex(self.game.pile)) % self.game.NUM_PLAYERS
                 for card in self.game.pile:
-                    if card.index // 13 == 0:
+                    if card.index < 13:
                         brokeSpades = True
                     self.game.players[winIndex].claimed.add(card)
-                self.playerCursor = (self.playerCursor + winIndex - 1) % 4
+                self.playerCursor = (self.playerCursor + winIndex - 1) % self.game.NUM_PLAYERS
+                print(self.game.pile)
             # Calculate scores
-            print("SCORES:")
-            print("--------")
+            print("SCORES: \n --------")
             bestScore = mean([x.calculateScore() for x in self.game.players if "AI" in x.name])
             testScore = ([x.calculateScore() for x in self.game.players if "Oracle" in x.name or "Test" in x.name])[0]
             print(testScore - bestScore)
             avgScoreDifferential.append(testScore - bestScore)
-            self.roundCursor = self.roundCursor + 1 % 4
+            self.roundCursor = self.roundCursor + 1 % self.game.NUM_PLAYERS
         print(mean(avgScoreDifferential))
-
-
