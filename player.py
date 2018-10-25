@@ -1,4 +1,7 @@
 import random
+from card import Card
+
+
 class Player:
     """
     State:
@@ -11,6 +14,10 @@ class Player:
         - Bid
         - Play Card
     """
+
+    # SCORING CONSTANTS
+    USE_BAGS = False
+
     def __init__(self, hand, name=""):
         # TODO
         self.hand = hand
@@ -25,26 +32,36 @@ class Player:
         raise NotImplementedError("declareBid not implemented")
 
     def removeCard(self, card):
-        self.hand = filter(lambda x: x.index != card.index, self.hand)
+        if card in self.hand:
+            self.hand = filter(lambda x: x.index != card.index, self.hand)
+            return True
+        else:
+            return False
 
     def playCard(self, actions, pile=None):
         raise NotImplementedError("playCard not implemented")
 
-    def calculateScore(self):
-        tricks = len(self.claimed) / 4
+    
+    def regressionScore(self, tricks):
         if tricks < self.bid:
             self.score += 10 * (tricks - self.bid)
         else:
             self.score += 10 * self.bid + (tricks - self.bid)
             self.bags += (tricks - self.bid)
-            while self.bags >= 10:
-                self.score -= 100
-                self.bags -= 10
-        print(self.name + " score: " + str(self.score))
-        # Reset round state
-        self.hand = []
-        self.claimed = set()
-        self.bid = 0
+            if Player.USE_BAGS:
+                while self.bags >= 10:
+                    self.score -= 100
+                    self.bags -= 10    
+
+    def calculateScore(self, scoreFunction=regressionScore):
+            tricks = len(self.claimed) / 4
+            scoreFunction(self, tricks)
+            print(self.name + " score: " + str(self.score))
+            # Reset round state
+            self.hand = []
+            self.claimed = set()
+            self.bid = 0
+
 
 class Human(Player):
 
@@ -92,7 +109,7 @@ class Baseline(Player):
 
 class Idiot(Player):
     def declareBid(self):
-        return random.choice([i for i in range(0, 14)])
+        return random.choice([i for i in range(Card.NUM_CARDS)])
     
     def playCard(self, actions, pile):
         card = random.choice(actions)

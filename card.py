@@ -1,6 +1,10 @@
 # coding=utf-8
 class Card:
 
+    # Card Constants
+    NUM_SUITS = 4
+    NUM_CARDS = 13
+    SPADES_SUIT = 3
     def __init__(self, index):
         """ 
         Indices: 0 - 12 -> Ace thru King of Spades
@@ -10,6 +14,13 @@ class Card:
         """
         self.index = index
 
+
+    def getValue(self):
+        # Face value... since 2 is index 0
+        return (self.index % 13) + 2
+
+    def getSuit(self):
+        return self.index // Card.NUM_SUITS
 
     def __str__(self):
         """
