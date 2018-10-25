@@ -88,12 +88,11 @@ class Human(Player):
 class Baseline(Player):
     def declareBid(self, state):
         # Let number of cards above jack be our bid #.
-        print("Dealt hand: " + str(self.hand))
+        #print("Dealt hand: " + str(self.hand))
         for card in self.hand:
             if card.index % 13 >= 10:
-                print(card)
                 self.bid += 1
-        print("Bid: " + str(self.bid))
+        #print("Bid: " + str(self.bid))
         return self.bid
 
     def playCard(self, state, actions, pile):
