@@ -121,6 +121,39 @@ class Oracle(Player):
     def declareBid(self, state):
         #TODO Change this
         return 3
-    
+
+    def canBeat(self, actions, otherActions, suit):
+        '''Looking at another player's actions, return None if we can't beat them.
+        Otherwise return a pair of True, and the lowest card that can beat the other player's
+        best play. '''
+        otherSpades = filter(lambda x: x.getSuit() == 0, otherActions)
+        mySpades = filter(lambda x: x.getSuit() == 0, actions)
+        mySuit = filter(lambda x: x.getSuit() == suit)
+        if(len(otherSpades) > 0):
+            #Both can play spades
+            if len(mySpades) == 0:
+                return None
+            oppBest = max(otherSpades)
+            myBest = max(filter(lambda x: x<= 12, actions))
+            if(oppBest > myBest):
+                return None
+            return min(filter(lambda x: x > oppBest, actions))
+        if min(actions) <= 12:
+            #I can play spades and opponent can't
+            return min(actions)
+        oppBest = max(otherActions)
+        myBest = max(actions)
+        if(oppBest > myBest):
+            #Both of us are in suit, he has higher card
+            return None
+        return min(filter(lambda x: x > oppBest, actions))
     def playCard(self, state, actions, pile):
+        if(len(pile) == 0):
+            #TODO Decide how to play first card
+            card = random.choice(actions)
+            self.removeCard(card)
+            return card
+        spades = False
+        suit = pile[0].getSuit()
+        # if()
         pass

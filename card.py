@@ -27,7 +27,7 @@ class Card:
         return (self.index % 13) + 2
 
     def getSuit(self):
-        return self.index // Card.NUM_SUITS
+        return self.index // Card.NUM_PER_SUIT
 
     def __str__(self):
         """

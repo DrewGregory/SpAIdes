@@ -13,6 +13,8 @@ class Moderator:
         self.players = [Idiot([], "Idiot " + str(i + 1))  for i in range(0, Game.NUM_PLAYERS - 1)]
         if args.human:
             self.players.append(Human([], "Human"))
+        elif args.oracle:
+            self.players.append(Oracle([], "Oracle"))
         else: 
             self.players.append(Baseline([], "Baseline"))
         self.pile = []
@@ -23,7 +25,7 @@ class Moderator:
 
         # Remove other player hands...
         # replace with just our player's hand
-        if not player.name == "ORACLE": # @GriffinKardos...when you make your oracle class change this
+        if not player.name == "Oracle": # @GriffinKardos...when you make your oracle class change this
             oracleGameState[0] = player.hand
         return oracleGameState
 
