@@ -33,7 +33,7 @@ class Player:
 
     def removeCard(self, card):
         if card in self.hand:
-            self.hand = filter(lambda x: x.index != card.index, self.hand)
+            self.hand = [x for x in self.hand if x.index != card.index]
             return True
         else:
             return False
@@ -51,6 +51,7 @@ class Player:
             while self.bags >= 10:
                 subScore -= 100
                 self.bags -= 10
+        return subScore
 
     def calculateScore(self, scoreFunction=regressionScore):
         tricks = len(self.claimed) / 4
