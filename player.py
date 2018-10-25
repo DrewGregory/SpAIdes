@@ -96,8 +96,6 @@ class Baseline(Player):
         return self.bid
 
     def playCard(self, state, actions, pile):
-        print(state)
-        print(str(self.hand) + " actions: " + str(actions))
         card = None
         if len(pile) == 0:
             card = random.choice(actions)
@@ -153,6 +151,7 @@ class Oracle(Player):
             #Both of us are in suit, he has higher card
             return None
         return min(filter(lambda x: x > oppBest, actions))
+        
     def playCard(self, state, actions, pile):
         if(len(pile) == 0):
             #TODO Decide how to play first card
