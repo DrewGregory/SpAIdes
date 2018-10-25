@@ -7,7 +7,6 @@ from statistics import mean
 class Moderator:
 
     def __init__(self, args):
-                
         self.deck = ([Card(i) for i in range(Card.NUM_CARDS)])
         shuffle(self.deck)
         self.players = [Idiot([], "Idiot " + str(i + 1))  for i in range(0, Game.NUM_PLAYERS - 1)]
@@ -20,30 +19,35 @@ class Moderator:
         self.pile = []
 
 
-    def getPlayerGameState(self, player):
-        oracleGameState = self.getOracleGameState()
+    def getPlayerGameState(self, player, playerCursor):
+        oracleGameState = self.getOracleGameState(playerCursor)
 
         # Remove other player hands...
         # replace with just our player's hand
-        if not player.name == "Oracle": # @GriffinKardos...when you make your oracle class change this
+        if False and not player.name == "Oracle": # @GriffinKardos...when you make your oracle class change this
             oracleGameState[0] = player.hand
         return oracleGameState
 
-    def getOracleGameState(self):
+    def getOracleGameState(self, playerCursor):
+        """
+        Get interesting state related to round.
+        For the three rays, the 0 index is yourself, each successive element follows
+        the ordering around the table clockwise.
+        """
         playerHands = []
         playerClaimedCards = []
-        playerSandBags = []
+        playerBids = []
 
-        for player in self.players:
+        for i in range(0, len(self.players)):
+            player = self.players[(playerCursor + i) % 4]
             playerHands.append(player.hand)
             playerClaimedCards.append(player.claimed)
-            playerSandBags.append(player.sandbags)
+            playerBids.append(player.bid)
         
-        return [playerHands, playerClaimedCards, playerSandBags, self.pile, self.roundCursor]
+        return [playerHands, playerClaimedCards, playerBids, self.pile]
 
 
     def playGame(self):
-
         """
         Rounds go as follows:
         1) Rotate positions of players
@@ -51,7 +55,6 @@ class Moderator:
         3) Ask each player for bid
         4) Play hands until out of cards
         """
-
         avgScoreDifferential = []
 
         while max((Game.END_SCORE,) + tuple([player.score for player in self.players])) == Game.END_SCORE:
@@ -59,7 +62,7 @@ class Moderator:
             shuffle(self.deck)
             for i in range(0, len(self.players)):
                 self.players[i].hand = self.deck[i * 13 : (i + 1) * 13]
-                playerState = self.getPlayerGameState(self.players[i])
+                playerState = self.getPlayerGameState(self.players[i], i)
                 self.players[i].declareBid(playerState)
             self.playerCursor = (self.roundCursor + 1) % 4 # left of dealer
             brokeSpades = False
@@ -68,7 +71,7 @@ class Moderator:
                 for i in range(0, len(self.players)):
                     player = self.players[(self.playerCursor + i) % len(self.players)]
                     actions = Game.genActions(player.hand, self.pile, brokeSpades)
-                    playerState = self.getPlayerGameState(player)
+                    playerState = self.getPlayerGameState(player, self.playerCursor + i)
                     self.pile.append(player.playCard(playerState, actions, self.pile))
                 winIndex = (self.playerCursor + Game.determineWinCardIndex(self.pile)) % 4
                 for card in self.pile:
@@ -82,6 +85,7 @@ class Moderator:
             avgIdiotScore = mean([x.calculateScore() for x in self.players if "Idiot" in x.name])
             avgBaselineScore = mean([x.calculateScore() for x in self.players if "Baseline" in x.name])
             avgScoreDifferential.append(avgBaselineScore - avgIdiotScore)
+            break
         print(mean(avgScoreDifferential))
 
 
