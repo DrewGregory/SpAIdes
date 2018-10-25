@@ -97,8 +97,6 @@ class Baseline(Player):
         return self.bid
 
     def playCard(self, state, actions, pile):
-        print(state)
-        print(str(self.hand) + " actions: " + str(actions))
         card = None
         if len(pile) == 0:
             card = random.choice(actions)
