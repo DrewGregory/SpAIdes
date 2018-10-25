@@ -56,9 +56,9 @@ class Moderator:
         """
         avgScoreDifferential = []
 
+        self.roundCursor = 0
         # while max((Game.END_SCORE,) + tuple([player.score for player in self.players])) == Game.END_SCORE:
         for _ in range(5000):
-            self.roundCursor = 0
             shuffle(self.deck)
             for i in range(0, len(self.players)):
                 self.players[i].hand = self.deck[i * 13 : (i + 1) * 13]
@@ -83,9 +83,10 @@ class Moderator:
             print("SCORES:")
             print("--------")
             bestScore = mean([x.calculateScore() for x in self.players if "AI" in x.name])
-            testScore = ([x.calculateScore() for x in self.players if "Oracle" in x.name])[0]
+            testScore = ([x.calculateScore() for x in self.players if "Oracle" in x.name or "Test" in x.name])[0]
             print(testScore - bestScore)
             avgScoreDifferential.append(testScore - bestScore)
+            self.roundCursor = self.roundCursor + 1 % 4
         print(mean(avgScoreDifferential))
 
 
