@@ -36,14 +36,20 @@ while max((499,) + tuple([player.score for player in players])) == 499:
             pile.append(player.playCard(actions, pile))
         winIndex = (playerCursor + determineWinCardIndex(pile)) % 4
         for card in pile:
-            if card.index / 13 == 0:
+            if card.index // 13 == 0:
                 brokeSpades = True
             players[winIndex].claimed.add(card)
         playerCursor = (playerCursor + winIndex - 1) % 4
     # Calculate scores
     print("SCORES:")
     print("--------")
-    avgScoreDifferential = mean()
-    for player in players:
-        player.calculateScore()
+    avgIdiotScore = mean([x.calculateScore() for x in players if "Idiot" in x.name])
+    avgBaselineScore = mean([x.calculateScore() for x in players if "Baseline" in x.name])
+    avgScoreDifferential.append(avgBaselineScore - avgIdiotScore)
+    
+
+
+print(mean(avgScoreDifferential))
+
+
 

@@ -26,7 +26,7 @@ class Card:
             num = "A"
         else:
             num = str(num + 2)
-        suit = self.index/13
+        suit = self.index // 13
         if suit == 0:
             suit = "♠"
         elif suit == 1:

@@ -25,26 +25,29 @@ class Player:
         raise NotImplementedError("declareBid not implemented")
 
     def removeCard(self, card):
-        self.hand = filter(lambda x: x.index != card.index, self.hand)
+        self.hand = [x for x in self.hand if x.index != card.index]
 
     def playCard(self, actions, pile=None):
         raise NotImplementedError("playCard not implemented")
 
     def calculateScore(self):
         tricks = len(self.claimed) / 4
+        subScore = 0
         if tricks < self.bid:
-            self.score += 10 * (tricks - self.bid)
+            subScore = 10 * (tricks - self.bid)
         else:
-            self.score += 10 * self.bid + (tricks - self.bid)
+            subScore = 10 * self.bid + (tricks - self.bid)
             self.bags += (tricks - self.bid)
             while self.bags >= 10:
-                self.score -= 100
+                subScore -= 100
                 self.bags -= 10
-        print(self.name + " score: " + str(self.score))
         # Reset round state
         self.hand = []
         self.claimed = set()
         self.bid = 0
+        self.score += subScore
+        print(self.name + " score: " + str(self.score))
+        return subScore
 
 class Human(Player):
 
