@@ -28,7 +28,7 @@ class Player:
         self.name = name
         self.bags = 0
 
-    def declareBid(self):
+    def declareBid(self, state):
         raise NotImplementedError("declareBid not implemented")
 
     def removeCard(self, card):
@@ -38,7 +38,7 @@ class Player:
         else:
             return False
 
-    def playCard(self, actions, pile=None):
+    def playCard(self, state, actions, pile=None):
         raise NotImplementedError("playCard not implemented")
 
     def regressionScore(self, tricks):
@@ -66,13 +66,13 @@ class Player:
 
 class Human(Player):
 
-    def declareBid(self):
+    def declareBid(self, state):
         print(self.name + "\'s turn:")
         print(self.hand)
         self.bid = int(input("What is your bid?"))
         return self.bid
 
-    def playCard(self, actions, pile):
+    def playCard(self, state, actions, pile):
         print(self.name + "\'s turn:")
         print("Pile: "+ str(pile))
         print("Possible Cards: " + str(actions))
@@ -85,14 +85,14 @@ class Human(Player):
         return actions[chosenIndex]
 
 class Baseline(Player):
-    def declareBid(self):
+    def declareBid(self, state):
         # Let number of cards above jack be our bid #.
         for card in self.hand:
             if card.index % 13 > 10:
                 self.bid += 1
         return self.bid
 
-    def playCard(self, actions, pile):
+    def playCard(self, state, actions, pile):
         print(str(self.hand) + " actions: " + str(actions))
         card = None
         if len(pile) == 0:
@@ -109,10 +109,18 @@ class Baseline(Player):
 
 
 class Idiot(Player):
-    def declareBid(self):
+    def declareBid(self, state):
         return random.choice([i for i in range(Card.NUM_CARDS)])
     
-    def playCard(self, actions, pile):
+    def playCard(self, state, actions, pile):
         card = random.choice(actions)
         self.removeCard(card)
         return card
+
+class Oracle(Player):
+    def declareBid(self, state):
+        #TODO Change this
+        return 3
+    
+    def playCard(self, state, actions, pile):
+        pass
