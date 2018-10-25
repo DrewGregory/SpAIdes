@@ -16,7 +16,7 @@ class Player:
     """
 
     # SCORING CONSTANTS
-    USE_BAGS = False
+    USE_BAGS = True
 
     def __init__(self, hand, name=""):
         # TODO
