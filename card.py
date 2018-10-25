@@ -3,7 +3,8 @@ class Card:
 
     # Card Constants
     NUM_SUITS = 4
-    NUM_CARDS = 13
+    NUM_CARDS = 52
+    NUM_PER_SUIT = 13
     SPADES_SUIT = 3
     def __init__(self, index):
         """ 

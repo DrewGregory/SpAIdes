@@ -10,7 +10,7 @@ class Moderator:
                 
         self.deck = ([Card(i) for i in range(Card.NUM_CARDS)])
         shuffle(self.deck)
-        self.players = [Idiot([], "Idiot " + str(i + 1))  for i in range(Game.NUM_PLAYERS - 1)]
+        self.players = [Idiot([], "Idiot " + str(i + 1))  for i in range(0, Game.NUM_PLAYERS - 1)]
         self.players.append(Baseline([], "Baseline"))
 
 
