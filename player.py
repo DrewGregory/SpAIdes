@@ -1,3 +1,4 @@
+import random
 class Player:
     """
     State:
@@ -23,6 +24,9 @@ class Player:
     def declareBid(self):
         raise NotImplementedError("declareBid not implemented")
 
+    def removeCard(self, card):
+        self.hand = filter(lambda x: x.index != card.index, self.hand)
+
     def playCard(self, actions, pile=None):
         raise NotImplementedError("playCard not implemented")
 
@@ -41,7 +45,7 @@ class Player:
         self.hand = []
         self.claimed = set()
         self.bid = 0
-    
+
 class Human(Player):
 
     def declareBid(self):
@@ -58,9 +62,29 @@ class Human(Player):
         print(self.claimed)
         print("Tricks so far: %d \t Bid: %d" % (len(self.claimed)/4, self.bid))
         chosenIndex = int(input("Which card do you want to play (Index)?"))
-        # Remove card from hand
-        self.hand = filter(lambda x: x.index != actions[chosenIndex].index, self.hand)
+        self.removeCard(actions[chosenIndex])
         print(" ")
         return actions[chosenIndex]
 
-        
+class Baseline(Player):
+    def declareBid(self):
+        # Let number of cards above jack be our bid #.
+        for card in self.hand:
+            if card.index % 13 > 10:
+                self.bid += 1
+        return self.bid
+
+    def playCard(self, actions, pile):
+        print(str(self.hand) + " actions: " + str(actions))
+        card = None
+        if len(pile) == 0:
+            card = random.choice(actions)
+        else:
+            # find highest card
+            chosenIndex = 0
+            for i in range(0, len(actions)):
+                if actions[i].index > actions[chosenIndex].index:
+                    chosenIndex = i
+            card = actions[chosenIndex]
+        self.removeCard(card)
+        return card

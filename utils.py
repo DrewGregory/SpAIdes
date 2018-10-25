@@ -5,11 +5,16 @@ def genActions(hand, pile, brokeSpades):
     If user has cards of  that suit, only show cards of that suit. Otherwise, give anything.
     """
     actions = []
+
     if len(pile) == 0:
-        if not brokeSpades:
-            return filter(lambda x: x.index / 13 > 0, hand)
-        else:
+        allCardsSpades = True
+        for card in hand:
+            if card.index / 13 != 0:
+                allCardsSpades = False
+        if brokeSpades or allCardsSpades:
             return hand
+        else:
+            return filter(lambda x: x.index / 13 > 0, hand)
     bottomSuit = pile[0].index / 13
     for card in hand:
         suit = card.index / 13

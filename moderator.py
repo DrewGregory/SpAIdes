@@ -1,10 +1,10 @@
-from player import Human
+from player import Human, Baseline
 from card import Card
 from random import shuffle
 from utils import genActions, determineWinCardIndex
 deck = ([Card(i) for i in range(0, 52)])
 shuffle(deck)
-players = [Human([], "Human " + str(i)) for i in range(0, 4)]
+players = [Baseline([], "Baseline " + str(i)) for i in range(0, 4)]
 
 """
 Rounds go as follows:
@@ -35,7 +35,8 @@ while max((499,) + tuple([player.score for player in players])) == 499:
             players[winIndex].claimed.add(card)
         playerCursor = (playerCursor + winIndex - 1) % 4
     # Calculate scores
+    print("SCORES:")
+    print("--------")
     for player in players:
         player.calculateScore()
-
 
