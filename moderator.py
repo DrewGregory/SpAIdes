@@ -1,4 +1,4 @@
-from player import Human, Baseline, Idiot
+from player import Human, Baseline, Idiot, Oracle
 from card import Card
 from random import shuffle
 from game import Game

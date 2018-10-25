@@ -17,6 +17,7 @@ class Player:
 
     # SCORING CONSTANTS
     USE_BAGS = True
+    BAGGING_COST = 0
 
     def __init__(self, hand, name=""):
         # TODO
@@ -49,7 +50,7 @@ class Player:
             subScore = 10 * self.bid + (tricks - self.bid)
             self.bags += (tricks - self.bid)
             while self.bags >= 10:
-                subScore -= 100
+                subScore -= self.BAGGING_COST
                 self.bags -= 10
         return subScore
 
@@ -125,18 +126,24 @@ class Idiot(Player):
 
 class Oracle(Player):
     def declareBid(self, state):
-        #TODO Change this
-        return 3
+        # Let number of cards above jack be our bid #.
+        print("Dealt hand: " + str(self.hand))
+        for card in self.hand:
+            if card.index % 13 >= 10:
+                print(card)
+                self.bid += 1
+        print("Bid: " + str(self.bid))
+        return self.bid
 
     def canBeat(self, actions, otherActions, suit):
         '''Looking at another player's actions, return None if we can't beat them.
         Otherwise return a pair of True, and the lowest card that can beat the other player's
         best play. '''
-        otherSpades = filter(lambda x: x.getSuit() == 0, otherActions)
-        otherSuit = filter(lambda x: x.getSuit() == suit, otherActions)
-        mySpades = filter(lambda x: x.getSuit() == 0, actions)
+        otherSpades = list(filter(lambda x: x.getSuit() == 0, otherActions))
+        otherSuit = list(filter(lambda x: x.getSuit() == suit, otherActions))
+        mySpades = list(filter(lambda x: x.getSuit() == 0, actions))
         ## mySuit == actions or [] by the rules of the game
-        mySuit = filter(lambda x: x.getSuit() == suit, actions)
+        mySuit = list(filter(lambda x: x.getSuit() == suit, actions))
         if len(mySpades) == 0 and len(mySuit) == 0:
             #I have no card that can win
             return None
@@ -147,11 +154,11 @@ class Oracle(Player):
                 return None
             oppBest = max(otherSpades, key = lambda x: x.getValue())
             myBest = max(mySpades, key = lambda x: x.getValue())
-            if(oppBest > myBest):
+            if(oppBest.getValue() > myBest.getValue()):
                 #opponent has better spade
                 return None
             #Return least card that wins
-            return min(filter(lambda x: x.getValue() > oppBest.getValue(), actions))
+            return min(filter(lambda x: x.getValue() > oppBest.getValue(), mySpades), key = lambda x: x.getValue())
         if len(otherSuit) == 0 and len(mySuit) > 0:
             ##Other dude has no cards that can take the trick
             return min(actions, key = lambda x: x.getValue())
@@ -164,15 +171,51 @@ class Oracle(Player):
         if(oppBest.getValue() > myBest.getValue()):
             #Both of us are in suit, he has higher card
             return None
-        return min(filter(lambda x: x > oppBest, actions))
-        
+        return min(filter(lambda x: x.getValue() > oppBest.getValue(), actions), key= lambda x: x.getValue())
+
     def playCard(self, state, actions, pile):
         if(len(pile) == 0):
             #TODO Decide how to play first card
             card = random.choice(actions)
             self.removeCard(card)
             return card
-        spades = False
         suit = pile[0].getSuit()
-        # if()
-        pass
+        numPlayed = len(pile)
+        #bestCard will be the max of the mins -- the least card I can play which will beat everyone
+        bestCard = pile[Game.determineWinCardIndex(pile)]
+        better = list(filter(lambda x: x.getSuit() == bestCard.getSuit() and x.getValue()>bestCard.getValue(), actions))
+        if(len(better) == 0):
+            if(bestCard.getSuit() == 0):
+                #I have no card that can beat the current spade
+                return self.playWorst(actions)
+            better = list(filter(lambda x: x.getSuit() == 0, actions))
+            if(len(better) == 0):
+                #I have no spades or in suit higher cards
+                return self.playWorst(actions)
+        bestCard = min(better, key = lambda x : x.getValue())
+        for i in range(numPlayed + 1, len(state[0])):
+            #The players are already in the order that they play
+            playerHand = state[0][i]
+            playerActions = Game.genActions(playerHand, pile, True)
+            nextBest = self.canBeat(actions, playerActions, suit)
+            if(nextBest == None):
+                return self.playWorst(actions)
+            if(nextBest.getSuit() == bestCard.getSuit()):
+                if(nextBest.getValue() > bestCard.getValue()):
+                    bestCard = nextBest
+            elif(nextBest.getSuit() == 0):
+                bestCard = nextBest
+            #else bestCard is a spade and the nextBest is not
+            
+        self.removeCard(bestCard)
+        return bestCard
+
+    def playWorst(self, actions):
+        '''Plays and removes the worst card from possible actions. Returns said card'''
+        worst = min(filter(lambda x : x.getSuit() != 0, actions), default = None, key = lambda x : x.getValue())
+        if(worst is not None):
+            self.removeCard(worst)
+            return worst
+        worst = min(actions, key = lambda x: x.getValue())
+        self.removeCard(worst)
+        return worst
