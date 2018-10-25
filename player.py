@@ -25,7 +25,7 @@ class Player:
         raise NotImplementedError("declareBid not implemented")
 
     def removeCard(self, card):
-        self.hand = filter(lambda x: x.index != card.index, self.hand)
+        self.hand = [x for x in self.hand if x.index != card.index]
 
     def playCard(self, actions, pile=None):
         raise NotImplementedError("playCard not implemented")

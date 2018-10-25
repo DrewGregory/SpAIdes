@@ -14,7 +14,7 @@ def genActions(hand, pile, brokeSpades):
         if brokeSpades or allCardsSpades:
             return hand
         else:
-            return filter(lambda x: x.index / 13 > 0, hand)
+            return [x for x in hand if x.index /13 > 0]
     bottomSuit = pile[0].index / 13
     for card in hand:
         suit = card.index / 13

@@ -43,7 +43,8 @@ while max((499,) + tuple([player.score for player in players])) == 499:
     # Calculate scores
     print("SCORES:")
     print("--------")
-    avgScoreDifferential = mean()
+    avgIdiotScore = mean([x for x in players if "Idiot" in x.name])
+    avgBaselineScore = mean([x for x in players if "Baseline" in x.name])
     for player in players:
         player.calculateScore()
 
