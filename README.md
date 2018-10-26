@@ -1,14 +1,18 @@
-# How to Run
-` python3 main.py `
+## How to Run
+` python3 main.py --human` to play as a human against 3 baseline characters
 
-## Classes
-Moderator: Performs logic on Game
+`python3 main.py --oracle` to have an "oracle" play against 3 baseline characters
+## Moderator: Performs logic on Game
 - playGame
 - determineWinCardWindex
 - genActions
-Game: Stateful class
+## Game: Stateful class
 - getPlayerGameState
 - getOracleGameState
-Player
-Card
-- only useful for printing in a human-readable format
+## Player
+- Idiot
+- Human
+- Baseline
+- Oracle
+## Card
+- useful for printing in a human-readable format

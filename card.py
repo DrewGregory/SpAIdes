@@ -21,7 +21,6 @@ class Card:
         """
         self.index = index
 
-
     def getValue(self):
         # Face value... since 2 is index 0
         return (self.index % 13) + 2
@@ -33,26 +32,11 @@ class Card:
         """
         Print out card in human-readable format
         """
-        num = self.index % 13
-        if num == 9:
-            num = "J"
-        elif num == 10:
-            num = "Q"
-        elif num == 11:
-            num = "K"
-        elif num == 12:
-            num = "A"
-        else:
-            num = str(num + 2)
-        suit = self.index // 13
-        if suit == 0:
-            suit = "♠"
-        elif suit == 1:
-            suit = "♣"
-        elif suit == 2:
-            suit = "♥"
-        else:
-            suit = "♦"
-        return num+suit
-        
+        d = {9: "J", 10: "Q", 11: "K", 12: "A"}
+        s = ["♠", "♣", "♥", "♦"]
+        num_val = self.index % 13
+        num_val = str(num_val + 2) if num_val < 9 else d[num_val]
+        suit = s[self.index // 13]
+        return num_val+suit
+
     __repr__  = __str__

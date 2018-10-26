@@ -2,6 +2,9 @@ from card import Card
 from random import shuffle
 from player import Human, Baseline, Idiot, Oracle
 class Game:
+    """
+    Stateful class holding the entire game state
+    """
 
     END_SCORE = 500 - 1
     NUM_PLAYERS = 4
@@ -18,8 +21,11 @@ class Game:
             self.players.append(Baseline([], "Test"))
         self.pile = []
 
-
     def getPlayerGameState(self, player, playerCursor):
+        """
+        @param Player player: _____
+        @param int playerCursor: index of player who won last round (i.e. starts this round)
+        """
         oracleGameState = self.getOracleGameState(playerCursor)
         # Remove other player hands...
         # replace with just our player's hand
@@ -30,13 +36,13 @@ class Game:
     def getOracleGameState(self, playerCursor):
         """
         Get interesting state related to round.
-        For the three rays, the 0 index is yourself, each successive element follows
+        For the three lists, the 0 index is yourself, each successive element follows
         the ordering around the table clockwise.
         """
         playerHands = []
         playerClaimedCards = []
         playerBids = []
-        for i in range(0, len(self.players)):
+        for i in range(len(self.players)):
             player = self.players[(playerCursor + i) % 4]
             playerHands.append(player.hand)
             playerClaimedCards.append(player.claimed)

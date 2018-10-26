@@ -1,9 +1,6 @@
 from player import Player
 
-
-
 class ModelPlayer(Player):
-
     '''
     Policy Evaluator class follows a predefined policy
     and attempts to learn a value function
@@ -19,10 +16,3 @@ class ModelPlayer(Player):
     def playCard(self, state, actions, pile=None):
         action = self.playPolicy(state, actions, pile)
         return action
-
-
-    
-    
-
-
-    

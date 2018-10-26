@@ -58,29 +58,34 @@ class Player:
         tricks = len(self.claimed) / 4
         subScore = scoreFunction(self, tricks)
         # Reset round state
-        self.hand = []
-        self.claimed = set()
-        self.bid = 0
+        self.resetRound()
         self.score += subScore
         print(self.name + " score: " + str(self.score))
         return subScore
+
+    def resetRound(self):
+        self.hand = []
+        self.claimed = set()
+        self.bid = 0
 
 class Human(Player):
 
     def declareBid(self, state):
         print(self.name + "\'s turn:")
         print(self.hand)
-        self.bid = int(input("What is your bid?"))
+        self.bid = int(input("What is your bid? "))
         return self.bid
 
     def playCard(self, state, actions, pile):
         print(self.name + "\'s turn:")
         print("Pile: "+ str(pile))
         print("Possible Cards: " + str(actions))
-        # TODO: print indices underneath card list
-        print(self.claimed)
+        print("Claimed cards: " + str(self.claimed))
         print("Tricks so far: %d \t Bid: %d" % (len(self.claimed)/4, self.bid))
-        chosenIndex = int(input("Which card do you want to play (Index)?"))
+        overly_large_index = 1000
+        chosenIndex = overly_large_index
+        while chosenIndex >= len(actions):
+            chosenIndex = int(input("Which card do you want to play (Index)? ") or overly_large_index)
         self.removeCard(actions[chosenIndex])
         print(" ")
         return actions[chosenIndex]
@@ -128,9 +133,11 @@ class Oracle(Player):
         return self.bid
 
     def canBeat(self, actions, otherActions, suit):
-        '''Looking at another player's actions, return None if we can't beat them.
+        '''
+        Looking at another player's actions, return None if we can't beat them.
         Otherwise return a pair of True, and the lowest card that can beat the other player's
-        best play. '''
+        best play.
+        '''
         otherSpades = list(filter(lambda x: x.getSuit() == 0, otherActions))
         otherSuit = list(filter(lambda x: x.getSuit() == suit, otherActions))
         mySpades = list(filter(lambda x: x.getSuit() == 0, actions))

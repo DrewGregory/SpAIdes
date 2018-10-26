@@ -1,21 +1,23 @@
-
 def genActions(hand, pile, brokeSpades):
     """
-    Given a player's hand and the pile of cards in the center, generate a list of possible cards the player can
-    play.
-    If user has cards of  that suit, only show cards of that suit. Otherwise, give anything.
+    @param list hand: player's hand
+    @param list pile: pile of cards in center
+    @param bool brokeSpades
+    @return list: all possible cards the player can play. 
+        If user has cards of leading suit, only return cards of same suit.
+        Otherwise, return entire hand.
     """
     actions = []
 
     if len(pile) == 0:
         allCardsSpades = True
         for card in hand:
-            if card.index // 13 != 0:
+            if card.index < 13:
                 allCardsSpades = False
         if brokeSpades or allCardsSpades:
             return hand
         else:
-            return [x for x in hand if x.index // 13 > 0]
+            return [x for x in hand if x.index >= 13]
     bottomSuit = pile[0].index // 13
     for card in hand:
         suit = card.index // 13
@@ -26,10 +28,15 @@ def genActions(hand, pile, brokeSpades):
     return actions
 
 def determineWinCardIndex(pile):
+    """
+    @param list pile: pile of cards in center
+    @return int: index of winning card -
+        highest index of leading suit, or if there are spades, highest spades index
+    """
     bestCard = (pile[0], 0)
     for i in range(1, len(pile)):
-        bestCardSuit = (bestCard[0].index // 13)
-        cardSuit = (pile[i].index // 13)
+        bestCardSuit = bestCard[0].index // 13
+        cardSuit = pile[i].index // 13
         if (bestCardSuit == cardSuit and pile[i].index > bestCard[0].index) or \
             (bestCardSuit != 0 and cardSuit == 0):
             bestCard = (pile[i], i)
