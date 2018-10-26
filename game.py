@@ -41,5 +41,4 @@ class Game:
             playerHands.append(player.hand)
             playerClaimedCards.append(player.claimed)
             playerBids.append(player.bid)
-        
         return [playerHands, playerClaimedCards, playerBids, self.pile]
