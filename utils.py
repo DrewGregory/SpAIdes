@@ -12,7 +12,7 @@ def genActions(hand, pile, brokeSpades):
     if len(pile) == 0:
         allCardsSpades = True
         for card in hand:
-            if card.index < 13:
+            if card.index >= 13:
                 allCardsSpades = False
         if brokeSpades or allCardsSpades:
             return hand

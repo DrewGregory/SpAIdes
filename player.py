@@ -176,7 +176,6 @@ class Oracle(Player):
         if(len(self.claimed)//4 == self.bid):
             return self.playWorst(actions)
         if(len(pile) == 0):
-            #TODO Decide how to play first card
             for i in range(4):
                 card = max(filter(lambda x: x.getSuit() == i, actions), default = None, key = lambda x: x.getValue())
                 if(card is None):

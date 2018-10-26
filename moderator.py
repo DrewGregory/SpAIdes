@@ -41,11 +41,9 @@ class Moderator:
                     self.game.pile.append(player.playCard(playerState, actions, self.game.pile))
                 # playerCursor now represents the *index of the winning player*
                 self.playerCursor = (self.playerCursor + determineWinCardIndex(self.game.pile)) % self.game.NUM_PLAYERS
-                print('index of winning player (you\'re 3): ', self.playerCursor)
                 if any (card.index < 13 for card in self.game.pile):
                     brokeSpades = True
                 self.game.players[self.playerCursor].claimed.update(self.game.pile)
-                print('round pile: ', self.game.pile, "\n")
             # Calculate scores
             print("SCORES: \n --------")
             bestScore = mean([x.calculateScore() for x in self.game.players if "AI" in x.name])

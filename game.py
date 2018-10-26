@@ -19,6 +19,7 @@ class Game:
             self.players.append(Oracle([], "Oracle"))
         else: 
             self.players.append(Baseline([], "Test"))
+        shuffle(self.players)
         self.pile = []
 
     def getPlayerGameState(self, player, playerCursor):
