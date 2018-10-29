@@ -1,6 +1,10 @@
 from card import Card
 from random import shuffle
 from player import Human, Baseline, Idiot, Oracle
+
+import numpy as np
+
+
 class Game:
     """
     Stateful class holding the entire game state
@@ -43,9 +47,33 @@ class Game:
         playerHands = []
         playerClaimedCards = []
         playerBids = []
+        playerBags = []
         for i in range(len(self.players)):
             player = self.players[(playerCursor + i) % 4]
             playerHands.append(player.hand)
             playerClaimedCards.append(player.claimed)
             playerBids.append(player.bid)
-        return [playerHands, playerClaimedCards, playerBids, self.pile]
+            playerBags.append(player.sandbags)
+        return [playerHands, playerClaimedCards, playerBids, playerBags, self.pile]
+
+    @staticmethod
+    def stateFeatureExtractor(state):
+        playerHands, playerClaimedCards, playerBids, playerBags, pile = state
+
+        # Binary indicators for each card for each hand/set of cards
+        def vectorizeHand(hand):
+            indicators = [0] * Card.NUM_CARDS
+            for card in hand:
+                indicators[card] = 1
+        
+        vectors = []
+        for hand in playerHands:
+            vectors.append(vectorizedHand(hand))
+        for claim in playerClaimedCards:
+            vectors.append(vectorizeHand(claim))
+        
+        vectors.append(vectorizeHand(pile))
+        vectors.append(playerBids) # just keep as numbers
+        vectors.append(playerBags)
+        return np.array(vectors, dtype=uint8)
+

@@ -63,6 +63,10 @@ class Player:
         print(self.name + " score: " + str(self.score))
         return subScore
 
+    def incorporateFeedback(self, reward, state):
+        pass
+
+
     def resetRound(self):
         self.hand = []
         self.claimed = set()
@@ -90,6 +94,8 @@ class Human(Player):
         print(" ")
         return actions[chosenIndex]
 
+
+
 class Baseline(Player):
     def declareBid(self, state):
         # Let number of cards above jack be our bid #.
@@ -111,7 +117,7 @@ class Baseline(Player):
             card = actions[chosenIndex]
         self.removeCard(card)
         return card
-
+    
 
 class Idiot(Player):
     def declareBid(self, state):

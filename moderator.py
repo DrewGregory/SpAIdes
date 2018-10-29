@@ -41,7 +41,7 @@ class Moderator:
                     self.game.pile.append(player.playCard(playerState, actions, self.game.pile))
                 # playerCursor now represents the *index of the winning player*
                 self.playerCursor = (self.playerCursor + determineWinCardIndex(self.game.pile)) % self.game.NUM_PLAYERS
-                if any (card.index < 13 for card in self.game.pile):
+                if any (card.index < Card.NUM_PER_SUIT for card in self.game.pile):
                     brokeSpades = True
                 self.game.players[self.playerCursor].claimed.update(self.game.pile)
             # Calculate scores
@@ -51,4 +51,11 @@ class Moderator:
             print(testScore - bestScore)
             avgScoreDifferential.append(testScore - bestScore)
             self.roundCursor = self.roundCursor + 1 % self.game.NUM_PLAYERS
+
+            # Incorporate Feedback From Game Score
+            for i in range(self.game.NUM_PLAYERS):
+                player = self.game.players[(self.playerCursor + i) % self.game.NUM_PLAYERS]
+                playerState = self.game.getPlayerGameState(player, self.playerCursor + i)
+                player.incorporateFeedback(player.calculateScore(), playerState )               
+
         print(mean(avgScoreDifferential))
