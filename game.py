@@ -16,12 +16,13 @@ class Game:
     def __init__(self, args):
         self.deck = ([Card(i) for i in range(Card.NUM_CARDS)])
         shuffle(self.deck)
-        self.players = [Baseline([], "AI Baseline " + str(i + 1))  for i in range(0, Game.NUM_PLAYERS - 1)]
+        self.players = [Baseline([], "AI Baseline " + str(i + 1))
+                        for i in range(0, Game.NUM_PLAYERS - 1)]
         if args.human:
             self.players.append(Human([], "Human"))
         elif args.oracle:
             self.players.append(Oracle([], "Oracle"))
-        else: 
+        else:
             self.players.append(Baseline([], "Test"))
         shuffle(self.players)
         self.pile = []
@@ -34,7 +35,7 @@ class Game:
         oracleGameState = self.getOracleGameState(playerCursor)
         # Remove other player hands...
         # replace with just our player's hand
-        if False and not player.name == "Oracle": # @GriffinKardos...when you make your oracle class change this
+        if False and not player.name == "Oracle":  # @GriffinKardos...when you make your oracle class change this
             oracleGameState[0] = player.hand
         return oracleGameState
 
@@ -54,10 +55,10 @@ class Game:
             playerClaimedCards.append(player.claimed)
             playerBids.append(player.bid)
             playerBags.append(player.sandbags)
-        return [playerHands, playerClaimedCards, playerBids, playerBags, self.pile]
+        return [playerHands, playerClaimedCards, playerBids, playerBags, self.pile, ]
 
     @staticmethod
-    def stateFeatureExtractor(state):
+    def stateFeatureExtractor(state, actions):
         playerHands, playerClaimedCards, playerBids, playerBags, pile = state
 
         # Binary indicators for each card for each hand/set of cards
@@ -65,15 +66,15 @@ class Game:
             indicators = [0] * Card.NUM_CARDS
             for card in hand:
                 indicators[card] = 1
-        
+
         vectors = []
         for hand in playerHands:
             vectors.append(vectorizedHand(hand))
         for claim in playerClaimedCards:
             vectors.append(vectorizeHand(claim))
-        
-        vectors.append(vectorizeHand(pile))
-        vectors.append(playerBids) # just keep as numbers
-        vectors.append(playerBags)
-        return np.array(vectors, dtype=uint8)
 
+        vectors.append(vectorizeHand(pile))
+        vectors.append(playerBids)  # just keep as numbers
+        vectors.append(playerBags)
+        vectors.append(vectorizeHand(actions))  # indicator of playable cards
+        return np.stack(vectors, dtype=uint8)

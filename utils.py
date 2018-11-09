@@ -27,6 +27,7 @@ def genActions(hand, pile, brokeSpades):
         return hand
     return actions
 
+
 def determineWinCardIndex(pile):
     """
     @param list pile: pile of cards in center
@@ -38,7 +39,7 @@ def determineWinCardIndex(pile):
         bestCardSuit = bestCard[0].index // 13
         cardSuit = pile[i].index // 13
         if (bestCardSuit == cardSuit and pile[i].index > bestCard[0].index) or \
-            (bestCardSuit != 0 and cardSuit == 0):
+                (bestCardSuit != 0 and cardSuit == 0):
             bestCard = (pile[i], i)
     #print("Out of " + str(pile) + " Best card: " + str(bestCard[0]))
     return bestCard[1]

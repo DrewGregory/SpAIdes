@@ -6,6 +6,7 @@ class Card:
     NUM_CARDS = 52
     NUM_PER_SUIT = 13
     SPADES_SUIT = 0
+
     def __init__(self, index):
         """ 
         Indices: 0 - 12 -> Ace thru King of Spades
@@ -39,4 +40,4 @@ class Card:
         suit = s[self.index // 13]
         return num_val+suit
 
-    __repr__  = __str__
+    __repr__ = __str__
