@@ -1,6 +1,7 @@
 from card import Card
 from random import shuffle
 from player import Human, Baseline, Idiot, Oracle
+from agents import ModelPlayer, QModel
 
 import numpy as np
 
@@ -26,6 +27,7 @@ class Game:
             self.players.append(Baseline([], "Test"))
         shuffle(self.players)
         self.pile = []
+
 
     def getPlayerGameState(self, player, playerCursor):
         """
@@ -65,16 +67,18 @@ class Game:
         def vectorizeHand(hand):
             indicators = [0] * Card.NUM_CARDS
             for card in hand:
-                indicators[card] = 1
+                indicators[card.index] = 1
+            return indicators
 
         vectors = []
         for hand in playerHands:
-            vectors.append(vectorizedHand(hand))
+            vectors.append(vectorizeHand(hand))
         for claim in playerClaimedCards:
             vectors.append(vectorizeHand(claim))
 
         vectors.append(vectorizeHand(pile))
-        vectors.append(playerBids)  # just keep as numbers
-        vectors.append(playerBags)
+        #vectors.append(playerBids)  # just keep as numbers
+        #vectors.append(playerBags)
         vectors.append(vectorizeHand(actions))  # indicator of playable cards
-        return np.stack(vectors, dtype=uint8)
+
+        return np.array(vectors)

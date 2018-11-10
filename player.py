@@ -29,6 +29,7 @@ class Player:
         self.bid = 0
         self.name = name
         self.bags = 0
+        self.playHistory = []
 
     def declareBid(self, state):
         raise NotImplementedError("declareBid not implemented")
@@ -64,7 +65,7 @@ class Player:
         print(self.name + " score: " + str(self.score))
         return subScore
 
-    def incorporateFeedback(self, reward, state):
+    def incorporateFeedback(self, terminalState, reward):
         pass
 
     def resetRound(self):
@@ -117,6 +118,9 @@ class Baseline(Player):
                     chosenIndex = i
             card = actions[chosenIndex]
         self.removeCard(card)
+
+        self.playHistory.append((state, card))
+
         return card
 
 

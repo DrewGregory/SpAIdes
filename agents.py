@@ -1,10 +1,15 @@
-from player import Player
+import numpy as np
+import torch.nn as nn
+
+from player import Player, Baseline
 import random
+import game
+from card import Card
 
 
-class ModelPlayer(Player):
+class ModelPlayer(Baseline):
     '''
-    General TD-Learning class
+    General Q-Learning class
 
     discount -- policy discount terms
     qmodel -- a learning model class, that supports prediction and updating
@@ -12,63 +17,78 @@ class ModelPlayer(Player):
     exploreProb -- eps greedy policy
     '''
 
-    def __init__(self, discount, model, featureExtractor, exploreProb=0):
+    def __init__(self, discount, model, actions, featureExtractor, exploreProb=0):
         super(self)
         self.discount = discount
         self.featureExtractor = featureExtractor
         self.exploreProb = exploreProb
         self.numiters = 0
-        self.model = model
+        self.model = model # evaluation function class
 
-    def getTD(self, state, actions):
+    def getQ(self, state, actions):
         vector_features = self.featureExtractor(state, actions)
-        return self.model.predict(vector_features)
+        output =  self.model.predict(vector_features)
+        return output
 
     def getStepSize(self):
         return 1.0 / self.numiters
 
-    def incorporateFeedback(self, state, action, reward, newState):
+    def incorporateFeedback(self, terminalState, reward):
 
-        currentEstimate = self.getTD(state, action)
-        target = reward + self.discount * self.getTD(newState, action)
+        lastState, lastAction = self.playHistory[-1]
+        self.personalFeedback(lastState, lastAction, reward, terminalState)
+
+        for i in reversed(range(len(self.playHistory))):
+            nextState, nextAction = self.playHistory[i]
+            state, action = self.playHistory[i-1]
+            self.personalFeedback(state, action, 0, next_state)
+
+
+    def personalFeedback(self, state, action, reward, newState):
+        self.numiters += 1
+        currentEstimate = self.getQ(state, action)
+        target = reward + self.discount * self.getQ(newState, action)
         diff = self.getStepSize() * (currentEstimate - target)
         self.model.update(diff)
 
-    def declareBid(self, state):
-        return 0
 
     def playCard(self, state, actions, pile=None):
-        self.numiters += 1
         if random.random() < self.exploreProb:
             return random.choice(actions)
 
         # tuple hax
-        return self.getTD(state, actions)
+        score, chosen =  max( [ (self.getQ(state,action), action) for action in actions ] )
 
+        self.hand.remove(chosen)
+        self.playHistory.append((state, chosen))
 
 
 '''
-E.X model = nn.Sequential(
+
+Class Used to encapsulate generic evaluation functions that we might want
+to test out for Q_opt.
+
+E.X linearmodel = nn.Sequential(
     nn.Linear(),
     nn.ReLU(),
     nn.Linear() 
     )
 
-    def p(features):
+    def pred(features):
         with(torch.no_grad()):
             result = model(features)
         return result
-    def u(features):
+    def upd(features):
         result = model(features)
         loss = loss_criterion(result)
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
     
-    td = TDModel(model, p, u)
+    td = TDModel(model, p, u)c
 '''
 
-class TDModel:
+class QModel:
 
     def __init__(self, model, predict_lambda, update_lambda):
         self.model = model
@@ -81,3 +101,15 @@ class TDModel:
     def update(self, diff):
         self.update_lambda(diff)
     
+
+
+
+### Play test around
+
+hidden = 100
+weights = nn.Sequential(
+    nn.Linear(52, hidden ),
+    nn.ReLU(),
+    nn.Linear(hidden, 52)
+)
+
