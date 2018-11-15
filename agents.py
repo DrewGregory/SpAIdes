@@ -38,14 +38,13 @@ class ModelPlayer(Baseline):
         return 1.0 / self.numiters
 
     def incorporateFeedback(self, newState, reward):
-
         lastState, lastAction = self.playHistory[-1]
         self.personalFeedback(lastState, lastAction, reward, newState)
 
 
     def personalFeedback(self, state, action, reward, newState):
         self.numiters += 1
-        vector_features = self.featureExtractor(state, actions)
+        vector_features = self.featureExtractor(state, action)
         #currentEstimate = self.getQ(state, action)
         target = reward + self.discount * self.getQ(newState, action)
         #diff = self.getStepSize() * (currentEstimate - target)
@@ -57,7 +56,7 @@ class ModelPlayer(Baseline):
             return random.choice(actions)
 
         # tuple hax
-        score, chosen =  max( [ (self.getQ(state,action), action) for action in actions ] )
+        score, chosen = max([(self.getQ(state,action), action) for action in actions])
 
         self.hand.remove(chosen)
         self.playHistory.append((state, chosen))
@@ -106,8 +105,7 @@ class QModel:
     
     def update(self, features, target):
         features = torch.from_numpy(features)
-        self.update_lambda(self.model, features, target)
-    
+        #self.update_lambda(self.model, features, target)
 
 
 
@@ -118,10 +116,12 @@ class ModelTest(ModelPlayer):
 
         hidden = 100
         learning_rate = 1e-3 # usually a reasonable val
+        LEN_FEATURE_VECTOR = 52      +    52         +      4     +   52  +   4
+        #                    pCards    claimedCards    playerBids   pile    tricks
         weights = nn.Sequential(
-        nn.Linear(52, hidden ),
-        nn.ReLU(),
-        nn.Linear(hidden, 1)
+            nn.Linear(LEN_FEATURE_VECTOR, hidden ),
+            nn.ReLU(),
+            nn.Linear(hidden, 1)
         )
         criterion = nn.MSELoss()
         optimizer = optim.Adam(weights.parameters(), lr=learning_rate)
@@ -139,8 +139,5 @@ class ModelTest(ModelPlayer):
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
-
         testQModel = QModel(weights, pred, upd)
-        super().__init__(1, testQModel, utils.genActions ,game.Game.stateFeatureExtractor, 0, hand, name)
-
-
+        super().__init__(1, testQModel, utils.genActions,  game.Game.stateFeatureExtractor, 0, hand, name)

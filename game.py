@@ -38,7 +38,7 @@ class Game:
         oracleGameState = self.getOracleGameState(playerCursor)
         # Remove other player hands...
         # replace with just our player's hand
-        if False and not player.name == "Oracle":  # @GriffinKardos...when you make your oracle class change this
+        if not player.name == "Oracle":  # @GriffinKardos...when you make your oracle class change this
             oracleGameState[0] = player.hand
         return oracleGameState
 
@@ -62,8 +62,7 @@ class Game:
 
     @staticmethod
     def stateFeatureExtractor(state, actions):
-        playerHands, playerClaimedCards, playerBids, playerBags, pile = state
-
+        playerHand, playerClaimedCards, playerBids, playerBags, pile = state
         # Binary indicators for each card for each hand/set of cards
         def vectorizeHand(hand):
             indicators = [0] * Card.NUM_CARDS
@@ -72,7 +71,7 @@ class Game:
             return indicators
 
         vectors = []
-        for hand in playerHands:
+        for hand in playerHand:
             vectors.append(vectorizeHand(hand))
         for claim in playerClaimedCards:
             vectors.append(vectorizeHand(claim))

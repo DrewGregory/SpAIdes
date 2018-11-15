@@ -59,10 +59,9 @@ class Moderator:
                     # Give reward for winning, but penalize if it's overbidding
                     if playerIndex == winnerIndex:
                         if player.tricksWon(self.game.NUM_PLAYERS) >= player.bid:
-                            reward = -1
+                            reward = -1.1
                         else:
                             reward = 1
-                    
                     player.incorporateFeedback(playerState, reward)
             
             # Calculate scores
@@ -74,12 +73,10 @@ class Moderator:
             self.roundCursor = self.roundCursor + 1 % self.game.NUM_PLAYERS
 
 
-            '''
             # Incorporate Feedback From Game Score
             for i in range(self.game.NUM_PLAYERS):
                 player = self.game.players[(self.playerCursor + i) % self.game.NUM_PLAYERS]
                 playerState = self.game.getPlayerGameState(player, (self.playerCursor + i) % self.game.NUM_PLAYERS)
-                player.incorporateFeedback(playerState, player.calculateScore())
-            '''
+                # player.incorporateFeedback(playerState, player.calculateScore())
 
         print(mean(avgScoreDifferential))
