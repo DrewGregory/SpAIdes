@@ -39,14 +39,31 @@ class Moderator:
                 for i in range(self.game.NUM_PLAYERS):
                     player = self.game.players[(self.playerCursor + i) % self.game.NUM_PLAYERS]
                     actions = genActions(player.hand, self.game.pile, brokeSpades)
-                    playerState = self.game.getPlayerGameState(player, self.playerCursor + i)
+                    playerState = self.game.getPlayerGameState(player, (self.playerCursor + i) % self.game.NUM_PLAYERS)
                     self.game.pile.append(player.playCard(playerState, actions ,self.game.pile))
-                # playerCursor now represents the *index of the winning player*
-                self.playerCursor = (self.playerCursor + determineWinCardIndex(self.game.pile)) % self.game.NUM_PLAYERS
+                # winnerIndex now represents the *index of the winning player*
+                winnerIndex = (self.playerCursor + determineWinCardIndex(self.game.pile)) % self.game.NUM_PLAYERS
                 if any (card.index < Card.NUM_PER_SUIT for card in self.game.pile):
                     brokeSpades = True
-                self.game.players[self.playerCursor].claimed.update(self.game.pile)
-            
+                # update winning player's claimed cards
+                self.game.players[winnerIndex].claimed.update(self.game.pile)
+
+                # incorporate feedback based on trick winning
+                for i in range(self.game.NUM_PLAYERS):
+                    playerIndex = (self.playerCursor+i) % self.game.NUM_PLAYERS
+                    player = self.game.players[playerIndex]
+                    playerState = self.game.getPlayerGameState(player, playerIndex)
+                    
+                    reward = 0  # default reward for no tricks won
+
+                    # Give reward for winning, but penalize if it's overbidding
+                    if playerIndex == winnerIndex:
+                        if player.tricksWon(self.game.NUM_PLAYERS) >= player.bid:
+                            reward = -1
+                        else:
+                            reward = 1
+                    
+                    player.incorporateFeedback(playerState, reward)
             
             # Calculate scores
             print("SCORES: \n --------")
@@ -56,10 +73,13 @@ class Moderator:
             avgScoreDifferential.append(testScore - bestScore)
             self.roundCursor = self.roundCursor + 1 % self.game.NUM_PLAYERS
 
+
+            '''
             # Incorporate Feedback From Game Score
             for i in range(self.game.NUM_PLAYERS):
                 player = self.game.players[(self.playerCursor + i) % self.game.NUM_PLAYERS]
-                playerState = self.game.getPlayerGameState(player, self.playerCursor + i)
+                playerState = self.game.getPlayerGameState(player, (self.playerCursor + i) % self.game.NUM_PLAYERS)
                 player.incorporateFeedback(playerState, player.calculateScore())
+            '''
 
         print(mean(avgScoreDifferential))

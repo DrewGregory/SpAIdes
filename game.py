@@ -1,7 +1,7 @@
 from card import Card
 from random import shuffle
 from player import Human, Baseline, Idiot, Oracle
-from agents import ModelPlayer, QModel
+from agents import ModelPlayer, QModel, ModelTest
 
 import numpy as np
 
@@ -24,7 +24,8 @@ class Game:
         elif args.oracle:
             self.players.append(Oracle([], "Oracle"))
         else:
-            self.players.append(Baseline([], "Test"))
+            self.players.append(ModelTest([], "ModelTest"))
+            #self.players.append(Baseline([], "Test"))
         shuffle(self.players)
         self.pile = []
 
@@ -79,6 +80,5 @@ class Game:
         vectors.append(vectorizeHand(pile))
         #vectors.append(playerBids)  # just keep as numbers
         #vectors.append(playerBags)
-        vectors.append(vectorizeHand(actions))  # indicator of playable cards
-
+        #vectors.append(vectorizeHand(actions))  # indicator of playable cards
         return np.array(vectors)
