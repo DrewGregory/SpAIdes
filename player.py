@@ -56,6 +56,10 @@ class Player:
                 self.bags -= 10
         return subScore
 
+    def tricksWon(self, numPlayers):
+        return len(self.claimed) // numPlayers
+
+
     def calculateScore(self, scoreFunction=regressionScore):
         tricks = len(self.claimed) / 4
         subScore = scoreFunction(self, tricks)
@@ -65,7 +69,7 @@ class Player:
         print(self.name + " score: " + str(self.score))
         return subScore
 
-    def incorporateFeedback(self, terminalState, reward):
+    def incorporateFeedback(self, newState, reward):
         pass
 
     def resetRound(self):

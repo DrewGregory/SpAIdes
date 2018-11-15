@@ -1,10 +1,14 @@
 import numpy as np
 import torch.nn as nn
+import torch.optim as optim
+import torch
+
 
 from player import Player, Baseline
 import random
 import game
 from card import Card
+import utils
 
 
 class ModelPlayer(Baseline):
@@ -17,8 +21,8 @@ class ModelPlayer(Baseline):
     exploreProb -- eps greedy policy
     '''
 
-    def __init__(self, discount, model, actions, featureExtractor, exploreProb=0):
-        super(self)
+    def __init__(self, discount, model, actions, featureExtractor, exploreProb, hand, name="",):
+        super().__init__(hand, name)
         self.discount = discount
         self.featureExtractor = featureExtractor
         self.exploreProb = exploreProb
@@ -33,23 +37,19 @@ class ModelPlayer(Baseline):
     def getStepSize(self):
         return 1.0 / self.numiters
 
-    def incorporateFeedback(self, terminalState, reward):
+    def incorporateFeedback(self, newState, reward):
 
         lastState, lastAction = self.playHistory[-1]
-        self.personalFeedback(lastState, lastAction, reward, terminalState)
-
-        for i in reversed(range(len(self.playHistory))):
-            nextState, nextAction = self.playHistory[i]
-            state, action = self.playHistory[i-1]
-            self.personalFeedback(state, action, 0, next_state)
+        self.personalFeedback(lastState, lastAction, reward, newState)
 
 
     def personalFeedback(self, state, action, reward, newState):
         self.numiters += 1
-        currentEstimate = self.getQ(state, action)
+        vector_features = self.featureExtractor(state, actions)
+        #currentEstimate = self.getQ(state, action)
         target = reward + self.discount * self.getQ(newState, action)
-        diff = self.getStepSize() * (currentEstimate - target)
-        self.model.update(diff)
+        #diff = self.getStepSize() * (currentEstimate - target)
+        self.model.update(vector_features, target)
 
 
     def playCard(self, state, actions, pile=None):
@@ -68,24 +68,29 @@ class ModelPlayer(Baseline):
 Class Used to encapsulate generic evaluation functions that we might want
 to test out for Q_opt.
 
-E.X linearmodel = nn.Sequential(
-    nn.Linear(),
-    nn.ReLU(),
-    nn.Linear() 
-    )
+E.X 
 
-    def pred(features):
-        with(torch.no_grad()):
-            result = model(features)
-        return result
-    def upd(features):
-        result = model(features)
-        loss = loss_criterion(result)
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
-    
-    td = TDModel(model, p, u)c
+hidden = 100
+lr = 1e-3 # usually a reasonable val
+weights = nn.Sequential(
+    nn.Linear(52, hidden ),
+    nn.ReLU(),
+    nn.Linear(hidden, 1)
+)
+criterion = nn.MSELoss()
+optimizer = torch.optim.Adam(weights.parameters(), lr=learning_rate)
+
+def pred(weights, features):
+    with torch.no_grad():
+        score = weights(features)
+        return weights
+
+def upd(weights, features, target):
+    current estimate = weights(features)
+    loss = criterion(current_estimate, target)
+    optimizer.zero_grad()
+    loss.backward()
+    optimizer.step()
 '''
 
 class QModel:
@@ -96,20 +101,46 @@ class QModel:
         self.update_lambda = update_lambda
     
     def predict(self, features):
-        return self.predict_lambda(features)
+        features = torch.from_numpy(features)
+        return self.predict_lambda(self.model, features)
     
-    def update(self, diff):
-        self.update_lambda(diff)
+    def update(self, features, target):
+        features = torch.from_numpy(features)
+        self.update_lambda(self.model, features, target)
     
 
 
 
 ### Play test around
+class ModelTest(ModelPlayer):
 
-hidden = 100
-weights = nn.Sequential(
-    nn.Linear(52, hidden ),
-    nn.ReLU(),
-    nn.Linear(hidden, 52)
-)
+    def __init__(self, hand, name=""):
+
+        hidden = 100
+        learning_rate = 1e-3 # usually a reasonable val
+        weights = nn.Sequential(
+        nn.Linear(52, hidden ),
+        nn.ReLU(),
+        nn.Linear(hidden, 1)
+        )
+        criterion = nn.MSELoss()
+        optimizer = optim.Adam(weights.parameters(), lr=learning_rate)
+
+        def pred(weights, features):
+            with torch.no_grad():
+                print(features.shape)
+                print(weights)
+                score = weights(features)
+            return weights
+
+        def upd(weights, features, target):
+            current_estimate = weights(features)
+            loss = criterion(current_estimate, target)
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
+
+        testQModel = QModel(weights, pred, upd)
+        super().__init__(1, testQModel, utils.genActions ,game.Game.stateFeatureExtractor, 0, hand, name)
+
 
