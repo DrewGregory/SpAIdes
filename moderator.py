@@ -8,6 +8,8 @@ from utils import genActions, determineWinCardIndex
 
 class Moderator:
 
+    NUM_GAMES = 15000
+    
     def __init__(self, args):
         self.game = Game(args)
 
@@ -23,7 +25,7 @@ class Moderator:
 
         self.roundCursor = 0
         # while max((Game.END_SCORE,) + tuple([player.score for player in self.players])) == Game.END_SCORE:
-        for _ in range(5000):
+        for _ in range(Moderator.NUM_GAMES):
             # Initialize round, deals cards and bids
             shuffle(self.game.deck)
             for i in range(self.game.NUM_PLAYERS):
@@ -67,7 +69,7 @@ class Moderator:
             # Calculate scores
             print("SCORES: \n --------")
             bestScore = mean([x.calculateScore() for x in self.game.players if "AI" in x.name])
-            testScore = ([x.calculateScore() for x in self.game.players if "Oracle" in x.name or "Test" in x.name])[0]
+            testScore = ([x.calculateScore() for x in self.game.players if "Oracle" in x.name or "Test" in x.name])[0]   
             print(testScore - bestScore)
             avgScoreDifferential.append(testScore - bestScore)
             self.roundCursor = self.roundCursor + 1 % self.game.NUM_PLAYERS
