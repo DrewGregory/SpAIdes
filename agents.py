@@ -65,7 +65,7 @@ class ModelPlayer(Baseline):
 
 '''
 
-Class Used to encapsulate generic evaluation functions that we might want
+Class used to encapsulate generic evaluation functions that we might want
 to test out for Q_opt.
 
 E.X linearmodel = nn.Sequential(

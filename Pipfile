@@ -5,6 +5,8 @@ name = "pypi"
 
 [packages]
 statistics = "*"
+torch = "==0.4.1"
+torchvision = "*"
 
 [dev-packages]
 

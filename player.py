@@ -207,7 +207,7 @@ class Oracle(Player):
                         if maxP.getValue() > card.getValue():
                             play = False
                             break
-                if(play):
+                if play:
                     self.removeCard(card)
                     return card
             return self.playWorst(actions)
