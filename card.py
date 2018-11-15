@@ -29,6 +29,10 @@ class Card:
     def getSuit(self):
         return self.index // Card.NUM_PER_SUIT
 
+
+    def __gt__(self, other):
+      return self.index > other.index
+      
     def __str__(self):
         """
         Print out card in human-readable format

@@ -45,9 +45,7 @@ class ModelPlayer(Baseline):
     def personalFeedback(self, state, action, reward, newState):
         self.numiters += 1
         vector_features = self.featureExtractor(state, action)
-        #currentEstimate = self.getQ(state, action)
         target = reward + self.discount * self.getQ(newState, action)
-        #diff = self.getStepSize() * (currentEstimate - target)
         self.model.update(vector_features, target)
 
 
@@ -57,9 +55,9 @@ class ModelPlayer(Baseline):
 
         # tuple hax
         score, chosen = max([(self.getQ(state,action), action) for action in actions])
-
         self.hand.remove(chosen)
         self.playHistory.append((state, chosen))
+        return chosen
 
 
 '''
@@ -100,12 +98,13 @@ class QModel:
         self.update_lambda = update_lambda
     
     def predict(self, features):
-        features = torch.from_numpy(features)
+        features = torch.tensor(features)
         return self.predict_lambda(self.model, features)
     
     def update(self, features, target):
-        features = torch.from_numpy(features)
-        #self.update_lambda(self.model, features, target)
+        
+        features = torch.tensor(features)
+        self.update_lambda(self.model, features, target)
 
 
 
@@ -116,8 +115,8 @@ class ModelTest(ModelPlayer):
 
         hidden = 100
         learning_rate = 1e-3 # usually a reasonable val
-        LEN_FEATURE_VECTOR = 52      +    52         +      4     +   52  +   4
-        #                    pCards    claimedCards    playerBids   pile    tricks
+        LEN_FEATURE_VECTOR =      52    +          52      +      4     +  52   +   4
+        #                    playerCards    claimedCards    playerBids   pile    tricks
         weights = nn.Sequential(
             nn.Linear(LEN_FEATURE_VECTOR, hidden ),
             nn.ReLU(),
@@ -128,14 +127,12 @@ class ModelTest(ModelPlayer):
 
         def pred(weights, features):
             with torch.no_grad():
-                print(features.shape)
-                print(weights)
                 score = weights(features)
-            return weights
+            return score
 
         def upd(weights, features, target):
             current_estimate = weights(features)
-            loss = criterion(current_estimate, target)
+            loss = criterion(current_estimate, torch.tensor(float(target)))
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()

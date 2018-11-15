@@ -77,6 +77,6 @@ class Moderator:
             for i in range(self.game.NUM_PLAYERS):
                 player = self.game.players[(self.playerCursor + i) % self.game.NUM_PLAYERS]
                 playerState = self.game.getPlayerGameState(player, (self.playerCursor + i) % self.game.NUM_PLAYERS)
-                # player.incorporateFeedback(playerState, player.calculateScore())
+                player.incorporateFeedback(playerState, player.calculateScore())
 
         print(mean(avgScoreDifferential))

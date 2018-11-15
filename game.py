@@ -75,19 +75,18 @@ class Game:
         '''
         playerHand, playerClaimedCards, playerBids, playerBags, pile = state
 
-        playerHandF = [0] * Card.NUM_CARDS
+        playerHandF = [float(0)] * Card.NUM_CARDS
         for card in playerHand:
-            playerHandF[card.index] = 1
+            playerHandF[card.index] = float(1)
 
-        claimedF = [0] * Card.NUM_CARDS
+        claimedF = [float(0)] * Card.NUM_CARDS
         for cards in playerClaimedCards:
             for card in cards:
-                claimedF[card.index] = 1
+                claimedF[card.index] = float(1)
         
-        pileF = [0] * Card.NUM_CARDS
+        pileF = [float(0)] * Card.NUM_CARDS
         for i, card in enumerate(pile):
-            pileF[card.index] = i + 1
+            pileF[card.index] = float(i + 1)
 
-        tricksF = [len(c) // 4 for c in playerClaimedCards] # should divide evenly
-
-        return np.array([playerHandF, claimedF, playerBids, pileF, tricksF])
+        tricksF = [float(len(c) // 4) for c in playerClaimedCards] # should divide evenly
+        return playerHandF + claimedF + playerBids +  pileF  + tricksF
