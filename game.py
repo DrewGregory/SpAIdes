@@ -38,7 +38,7 @@ class Game:
         oracleGameState = self.getOracleGameState(playerCursor)
         # Remove other player hands...
         # replace with just our player's hand
-        if False and not player.name == "Oracle":  # @GriffinKardos...when you make your oracle class change this
+        if not player.name == "Oracle":  # @GriffinKardos...when you make your oracle class change this
             oracleGameState[0] = player.hand
         return oracleGameState
 
@@ -62,23 +62,32 @@ class Game:
 
     @staticmethod
     def stateFeatureExtractor(state, actions):
-        playerHands, playerClaimedCards, playerBids, playerBags, pile = state
+        '''
+        @return np.array feature vector
+        Features:
+        1. playerHandF: [int], len 52
+        2. claimedF: [int], len 52, among all players
+        3. playerBids: [int], len 4
+        4. pileF: [map], len 52
+        5. tricksF: [int], len 4, number of bids each player has
+        NOTE: do not call this method using the oracle
+        NOTE: bags not included
+        '''
+        playerHand, playerClaimedCards, playerBids, playerBags, pile = state
 
-        # Binary indicators for each card for each hand/set of cards
-        def vectorizeHand(hand):
-            indicators = [0] * Card.NUM_CARDS
-            for card in hand:
-                indicators[card.index] = 1
-            return indicators
+        playerHandF = [0] * Card.NUM_CARDS
+        for card in playerHand:
+            playerHandF[card.index] = 1
 
-        vectors = []
-        for hand in playerHands:
-            vectors.append(vectorizeHand(hand))
-        for claim in playerClaimedCards:
-            vectors.append(vectorizeHand(claim))
+        claimedF = [0] * Card.NUM_CARDS
+        for cards in playerClaimedCards:
+            for card in cards:
+                claimedF[card.index] = 1
+        
+        pileF = [0] * Card.NUM_CARDS
+        for i, card in enumerate(pile):
+            pileF[card.index] = i + 1
 
-        vectors.append(vectorizeHand(pile))
-        #vectors.append(playerBids)  # just keep as numbers
-        #vectors.append(playerBags)
-        #vectors.append(vectorizeHand(actions))  # indicator of playable cards
-        return np.array(vectors)
+        tricksF = [len(c) // 4 for c in playerClaimedCards] # should divide evenly
+
+        return np.array([playerHandF, claimedF, playerBids, pileF, tricksF])

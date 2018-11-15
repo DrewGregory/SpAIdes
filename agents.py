@@ -141,6 +141,4 @@ class ModelTest(ModelPlayer):
             optimizer.step()
 
         testQModel = QModel(weights, pred, upd)
-        super().__init__(1, testQModel, utils.genActions ,game.Game.stateFeatureExtractor, 0, hand, name)
-
-
+        super().__init__(1, testQModel, utils.genActions, game.Game.stateFeatureExtractor, 0, hand, name)
