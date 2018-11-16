@@ -1,6 +1,7 @@
 import numpy as np
 import torch.nn as nn
 import torch.optim as optim
+import torch.cuda as cuda
 import torch
 
 
@@ -133,26 +134,47 @@ class ModelTest(ModelPlayer):
 
     def __init__(self, hand, name=""):
 
-        hidden = 100
+        
         learning_rate = 1e-3 # usually a reasonable val
         LEN_FEATURE_VECTOR =      52    +          52      +      4     +  52   +   4
         #                    playerCards    claimedCards    playerBids   pile    tricks
-        weights = nn.Sequential(
-            nn.Linear(LEN_FEATURE_VECTOR, hidden ),
-            nn.ReLU(),
-            nn.Linear(hidden, 1)
-        )
+        
+        # Auto create deep linear NN from just changing hidden
+        hidden = [100, 200, 200, 150, 150, 200, 200, 200] ##Just change this
+        
+        #######  Keep Here ############
+        modules = [nn.Linear(LEN_FEATURE_VECTOR, hidden[0])]
+        for i in range(len(hidden)-1 ):
+            modules.append(nn.Linear(hidden[i], hidden[i+1]))
+        modules.append(nn.Linear(hidden[-1], 1))
+        ######   KEEP HERE #########
+        
+        weights = nn.Sequential(*modules)
+
         criterion = nn.MSELoss()
-        optimizer = optim.Adam(weights.parameters(), lr=learning_rate)
+        optimizer = optim.Adam(weights.parameters(), lr=learning_rate, weight_decay=1e-4)
+        # setup gpu computing
+        if cuda.is_available():
+            weights = weights.cuda()
+            criterion = criterion.cuda()
+            
+
 
         def pred(weights, features):
             with torch.no_grad():
+                if cuda.is_available():
+                    features = features.cuda()
                 score = weights(features)
             return score
 
         def upd(weights, features, target):
+            t = torch.tensor(float(target))
+            if cuda.is_available():
+                features = features.cuda()
+                t = t.cuda()
+            
             current_estimate = weights(features)
-            loss = criterion(current_estimate, torch.tensor(float(target)))
+            loss = criterion(current_estimate, t)
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
