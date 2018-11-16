@@ -24,13 +24,8 @@ class Moderator:
         avgScoreDifferential = []
 
         self.roundCursor = 0
-<<<<<<< HEAD
-        #while max((Game.END_SCORE,) + tuple([player.score for player in self.game.players])) == Game.END_SCORE:
-        for _ in range(5000):
-=======
         # while max((Game.END_SCORE,) + tuple([player.score for player in self.players])) == Game.END_SCORE:
         for _ in range(Moderator.NUM_GAMES):
->>>>>>> 5ad1332e77104e5890ee5833aceecf0a03f25c20
             # Initialize round, deals cards and bids
             
             shuffle(self.game.deck)
@@ -70,20 +65,11 @@ class Moderator:
                         else:
                             reward = 1
                     player.incorporateFeedback(playerState, reward)
-<<<<<<< HEAD
 
                 self.game.pile = []
             aiScores = [x.calculateScore() for x in self.game.players if "AI" in x.name]
             bestScore = mean(aiScores)
             testScore = ([x.calculateScore() for x in self.game.players if "Oracle" in x.name or "Test" in x.name])[0]
-=======
-            
-            # Calculate scores
-            print("SCORES: \n --------")
-            bestScore = mean([x.calculateScore() for x in self.game.players if "AI" in x.name])
-            testScore = ([x.calculateScore() for x in self.game.players if "Oracle" in x.name or "Test" in x.name])[0]   
-            print(testScore - bestScore)
->>>>>>> 5ad1332e77104e5890ee5833aceecf0a03f25c20
             avgScoreDifferential.append(testScore - bestScore)
             self.roundCursor = self.roundCursor + 1 % self.game.NUM_PLAYERS
             if _ % 100 == 0:
