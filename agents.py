@@ -30,12 +30,13 @@ class ModelPlayer(Baseline):
         self.numiters = 0
         self.model = model # evaluation function class
 
-    '''def declareBid(self, state):
+    def declareBid(self, state):
         # which bid gives us our best q?
         if random.random() < .3:
             choice = random.choice(range(13))
             print("random choice: " + str(choice))
-            return choice
+            self.bid = choice
+            return self.bid
         bestQ = (float("-inf"), None)
         for i in range(0, 14):
             state[2][0] = i
@@ -44,8 +45,8 @@ class ModelPlayer(Baseline):
             bestQ = max(bestQ, (newQ, i))
         # Don't need to revert our bid cuz it will be overwritten
         print("bestChoice: " + str(bestQ[1]))
-        return bestQ[1]
-        '''
+        self.bid = bestQ[1]
+        return self.bid
 
 
     def getQ(self, state, actions):
@@ -136,11 +137,11 @@ class ModelTest(ModelPlayer):
 
         
         learning_rate = 1e-3 # usually a reasonable val
-        LEN_FEATURE_VECTOR =      52    +          52      +      4     +  52   +   4
-        #                    playerCards    claimedCards    playerBids   pile    tricks
+        LEN_FEATURE_VECTOR =      52    +          52      +      4     +  52   +   4    +    4
+        #                    playerCards    claimedCards    playerBids   pile    tricks       
         
         # Auto create deep linear NN from just changing hidden
-        hidden = [100, 200, 100] ##Just change this
+        hidden = [100, 200, 100, 150 ,150, 200] ##Just change this
         
         #######  Keep Here ############
         modules = [nn.Linear(LEN_FEATURE_VECTOR, hidden[0])]

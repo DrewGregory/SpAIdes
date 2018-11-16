@@ -29,10 +29,17 @@ class Moderator:
             # Initialize round, deals cards and bids
             
             shuffle(self.game.deck)
+            if _%100 == 0:
+                print("BIDS: \n ------")
+
             for i in range(self.game.NUM_PLAYERS):
                 self.game.players[i].hand = self.game.deck[i * 13 : (i + 1) * 13]
                 playerState = self.game.getPlayerGameState(self.game.players[i], i)
                 self.game.players[i].declareBid(playerState)
+
+                if _%100==0:
+                    print(self.game.players[i].name , "bid " + str(self.game.players[i].bid))
+
             self.playerCursor = (self.roundCursor + 1) % self.game.NUM_PLAYERS # left of dealer
             brokeSpades = False
 
@@ -56,29 +63,30 @@ class Moderator:
                     player = self.game.players[playerIndex]
                     playerState = self.game.getPlayerGameState(player, playerIndex)
                     
-                    reward = 0  # default reward for no tricks won
+                    reward = -1  # default reward for no tricks won
 
                     # Give reward for winning, but penalize if it's overbidding
                     if playerIndex == winnerIndex:
-                        if player.tricksWon(self.game.NUM_PLAYERS) >= player.bid:
+                        if player.tricksWon(self.game.NUM_PLAYERS) > player.bid:
                             reward = -1.1
                         else:
                             reward = 1
                     player.incorporateFeedback(playerState, reward)
 
                 self.game.pile = []
-            aiScores = [x.calculateScore() for x in self.game.players if "AI" in x.name]
-            bestScore = mean(aiScores)
-            testScore = ([x.calculateScore() for x in self.game.players if "Oracle" in x.name or "Test" in x.name])[0]
-            avgScoreDifferential.append(testScore - bestScore)
+            aiScores = [ (x.calculateScore(), x.bid, x.tricksWon(self.game.NUM_PLAYERS)) for x in self.game.players if "AI" in x.name]
+            bestScore = mean([x[0] for x in aiScores])
+            testScore = ([ (x.calculateScore(), x.bid, x.tricksWon(self.game.NUM_PLAYERS)) for x in self.game.players if "Oracle" in x.name or "Test" in x.name])[0]
+            
+            avgScoreDifferential.append(testScore[0] - bestScore)
             self.roundCursor = self.roundCursor + 1 % self.game.NUM_PLAYERS
             if _ % 100 == 0:
                 # Calculate scores
                 print("SCORES: \n --------")
                 for score  in aiScores:
-                    print("Baseline score: " + str(score))
-                print("Model Score: " + str(testScore))
-                print(testScore - bestScore)
+                    print("Baseline score: " + str(score[0]), "Bid:", score[1], "Tricks Won:", score[2] )
+                print("Model Score: " + str(testScore[0]), "Bid: ", testScore[1], "Tricks Won: ", testScore[2] )
+                print(testScore[0] - bestScore)
                 
 
 

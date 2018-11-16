@@ -104,10 +104,13 @@ class Human(Player):
 
 class Baseline(Player):
     def declareBid(self, state):
-        # Let number of cards above jack be our bid #.
+        # Let number of cards above queen be our bid #.
         for card in self.hand:
-            if card.index % 13 >= 10:
+            if card.index % 13 >= 11:
                 self.bid += 1
+            elif card.getSuit() == Card.SPADES_SUIT:
+                self.bid += 0.3 # add small amount for low spades
+        self.bid = int(min(self.bid , 13))
         return self.bid
 
     def playCard(self, state, actions, pile):

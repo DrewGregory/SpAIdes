@@ -17,7 +17,7 @@ class Game:
     def __init__(self, args):
         self.deck = ([Card(i) for i in range(Card.NUM_CARDS)])
         shuffle(self.deck)
-        self.players = [Baseline([], "AI Baseline " + str(i + 1))
+        self.players = [Oracle([], "AI Oracle " + str(i + 1))
                         for i in range(0, Game.NUM_PLAYERS - 1)]
         if args.human:
             self.players.append(Human([], "Human"))
@@ -38,7 +38,7 @@ class Game:
         oracleGameState = self.getOracleGameState(playerCursor)
         # Remove other player hands...
         # replace with just our player's hand
-        if not player.name == "Oracle":  # @GriffinKardos...when you make your oracle class change this
+        if not "Oracle" in player.name:  # @GriffinKardos...when you make your oracle class change this
             oracleGameState[0] = player.hand
         return oracleGameState
 
@@ -89,4 +89,4 @@ class Game:
             pileF[card.index] = float(i + 1)
 
         tricksF = [float(len(c) // 4) for c in playerClaimedCards] # should divide evenly
-        return playerHandF + claimedF + playerBids +  pileF  + tricksF
+        return playerHandF + claimedF + playerBids +  pileF  + tricksF + playerBags
