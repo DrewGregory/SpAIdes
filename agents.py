@@ -29,12 +29,12 @@ class ModelPlayer(Baseline):
         self.exploreProb = exploreProb
         self.numiters = 0
         self.model = model # evaluation function class
-
+    """
     def declareBid(self, state):
         # which bid gives us our best q?
         if random.random() < .05:
             choice = random.choice(range(13))
-            print("random choice: " + str(choice))
+            #print("random choice: " + str(choice))
             self.bid = choice
             return self.bid
         bestQ = (float("-inf"), None)
@@ -43,13 +43,13 @@ class ModelPlayer(Baseline):
             newStateArr[i] = 1
             state[2] = newStateArr + state[2][14:]
             newQ = float(self.getQ(state, None))
-            print("NEWQ : " + str(newQ))
+            #print("NEWQ : " + str(newQ))
             bestQ = max(bestQ, (newQ, i))
         # Don't need to revert our bid cuz it will be overwritten
-        print("bestChoice: " + str(bestQ[1]))
+        #print("bestChoice: " + str(bestQ[1]))
         self.bid = bestQ[1]
         return self.bid
-
+        """
 
     def getQ(self, state, actions):
         vector_features = self.featureExtractor(state, actions)
