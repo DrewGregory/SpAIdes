@@ -143,7 +143,7 @@ class ModelTest(ModelPlayer):
         #                    playerCards    claimedCards    playerBids   pile    tricks       
         
         # Auto create deep linear NN from just changing hidden
-        hidden = [100, 200, 100, 150 ,150, 200] ##Just change this
+        hidden = [100,  200] ##Just change this
         
         #######  Keep Here ############
         modules = [nn.Linear(LEN_FEATURE_VECTOR, hidden[0])]
