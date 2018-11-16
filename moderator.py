@@ -63,7 +63,7 @@ class Moderator:
                     player = self.game.players[playerIndex]
                     playerState = self.game.getPlayerGameState(player, playerIndex)
                     
-                    reward = -1  # default reward for no tricks won
+                    reward = 0  # default reward for no tricks won
 
                     # Give reward for winning, but penalize if it's overbidding
                     if playerIndex == winnerIndex:
@@ -75,17 +75,17 @@ class Moderator:
 
                 self.game.pile = []
             otherScores = [ ( x.tricksWon(self.game.NUM_PLAYERS), x.bid, x.calculateScore()) for x in self.game.players if "AI" in x.name]
-            bestScore = mean([x[0] for x in otherScores])
+            bestScore = mean([x[2] for x in otherScores])
             testScore = ([ (x.tricksWon(self.game.NUM_PLAYERS), x.bid, x.calculateScore()) for x in self.game.players if "Test" in x.name])[0]
             
-            avgScoreDifferential.append(testScore[0] - bestScore)
+            avgScoreDifferential.append(testScore[2] - bestScore)
             self.roundCursor = self.roundCursor + 1 % self.game.NUM_PLAYERS
             if _ % 100 == 0:
                 # Calculate scores
                 print("SCORES: \n --------")
                 for score  in otherScores:
-                    print("Baseline score: " + str(score[2]), "Bid:", score[1], "Tricks Won:", score[2] )
-                print("Model Score: " + str(testScore[2]), "Bid: ", testScore[1], "Tricks Won: ", testScore[2] )
+                    print("Baseline score: " + str(score[2]), "Bid:", score[1], "Tricks Won:", score[0] )
+                print("Model Score: " + str(testScore[2]), "Bid: ", testScore[1], "Tricks Won: ", testScore[0] )
                 print(testScore[0] - bestScore)
                 
 

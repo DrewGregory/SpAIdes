@@ -30,7 +30,7 @@ class ModelPlayer(Baseline):
         self.numiters = 0
         self.model = model # evaluation function class
 
-    def declareBid(self, state):
+    '''def declareBid(self, state):
         # which bid gives us our best q?
         if random.random() < .05:
             choice = random.choice(range(13))
@@ -43,17 +43,17 @@ class ModelPlayer(Baseline):
             newStateArr[i] = 1
             state[2] = newStateArr + state[2][14:]
             newQ = float(self.getQ(state, None))
-            print("NEWQ : " + str(newQ))
+            #print("NEWQ : " + str(newQ))
             bestQ = max(bestQ, (newQ, i))
         # Don't need to revert our bid cuz it will be overwritten
         print("bestChoice: " + str(bestQ[1]))
         self.bid = bestQ[1]
         return self.bid
-
+        '''
 
     def getQ(self, state, actions):
         vector_features = self.featureExtractor(state, actions)
-        output =  self.model.predict(vector_features)
+        output = self.model.predict(vector_features)
         return output
 
     def getStepSize(self):
@@ -131,6 +131,18 @@ class QModel:
         self.update_lambda(self.model, features, target)
 
 
+class Flatten(nn.Module):
+    def __init__(self):
+        super(Flatten, self).__init__()
+
+    def forward(self, x):
+        return x.view(-1)
+
+class Unflatten(nn.Module):
+    def __init__(self):
+        super(Unflatten, self).__init__()
+    def forward(self, x):
+        return x.view(1, 1,-1)
 
 ### Play test around
 class ModelTest(ModelPlayer):
@@ -138,11 +150,12 @@ class ModelTest(ModelPlayer):
     def __init__(self, hand, name=""):
 
         
-        learning_rate = 1e-3 # usually a reasonable val
+        learning_rate = 5e-3 # usually a reasonable val
         LEN_FEATURE_VECTOR =      52    +          52      +     14*4     +  52   +   4    +    4
         #                    playerCards    claimedCards    playerBids   pile    tricks       
         
-        # Auto create deep linear NN from just changing hidden
+        '''
+       # Auto create deep linear NN from just changing hidden
         hidden = [100, 200, 100, 150 ,150, 200] ##Just change this
         
         #######  Keep Here ############
@@ -154,6 +167,23 @@ class ModelTest(ModelPlayer):
         ######   KEEP HERE #########
         
         weights = nn.Sequential(*modules)
+        '''
+
+        weights = nn.Sequential(
+            nn.Linear(LEN_FEATURE_VECTOR, 100),
+            Unflatten(),
+            nn.ReLU(),
+            nn.Conv1d(in_channels=1, out_channels=4, kernel_size=5, padding=2),
+            nn.ReLU(),
+            nn.Conv1d(in_channels=4, out_channels=4, kernel_size=5, padding=2),
+            nn.ReLU(),
+            nn.Conv1d(in_channels=4, out_channels=4, kernel_size=3, padding=1),
+            Flatten(),
+            nn.Linear(4*100, 100),
+            nn.ReLU(),
+            nn.Linear(100, 1)
+        )
+
 
         criterion = nn.MSELoss()
         optimizer = optim.Adam(weights.parameters(), lr=learning_rate, weight_decay=1e-4)
@@ -161,7 +191,6 @@ class ModelTest(ModelPlayer):
         if cuda.is_available():
             weights = weights.cuda()
             criterion = criterion.cuda()
-            
 
 
         def pred(weights, features):
