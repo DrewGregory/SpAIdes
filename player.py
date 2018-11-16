@@ -18,7 +18,7 @@ class Player:
 
     # SCORING CONSTANTS
     USE_BAGS = True
-    BAGGING_COST = 100
+    BAGGING_COST = 50
 
     def __init__(self, hand, name=""):
         # TODO

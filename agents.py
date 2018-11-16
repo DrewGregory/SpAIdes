@@ -30,7 +30,7 @@ class ModelPlayer(Baseline):
         self.numiters = 0
         self.model = model # evaluation function class
 
-    '''def declareBid(self, state):
+    def declareBid(self, state):
         # which bid gives us our best q?
         if random.random() < .05:
             choice = random.choice(range(13))
@@ -49,7 +49,7 @@ class ModelPlayer(Baseline):
         #print("bestChoice: " + str(bestQ[1]))
         self.bid = bestQ[1]
         return self.bid
-        '''
+        
 
     def getQ(self, state, actions):
         vector_features = self.featureExtractor(state, actions)
