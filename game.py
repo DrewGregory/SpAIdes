@@ -23,6 +23,8 @@ class Game:
             self.players.append(Human([], "Human"))
         elif args.oracle:
             self.players.append(Oracle([], "Oracle"))
+        elif args.idiot:
+            self.players.append(Idiot([], "Idiot"))
         else:
             self.players.append(ModelTest([], "Model Test"))
             #self.players.append(Baseline([], "Test"))

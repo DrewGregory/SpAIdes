@@ -68,11 +68,11 @@ class Moderator:
                     # Give reward for winning, but penalize if it's overbidding
                     if playerIndex == winnerIndex:
                         if player.tricksWon(self.game.NUM_PLAYERS) > player.bid:
-                            reward = -0.5
+                            reward = 0
                         else:
                             reward = 1
                     player.incorporateFeedback(playerState, reward)
-
+                self.playerCursor = winnerIndex
                 self.game.pile = []
             otherScores = [ ( x.tricksWon(self.game.NUM_PLAYERS), x.bid, x.calculateScore()) for x in self.game.players if "AI" in x.name]
             bestScore = mean([x[2] for x in otherScores])

@@ -150,13 +150,14 @@ class ModelTest(ModelPlayer):
     def __init__(self, hand, name=""):
 
         
-        learning_rate = 5e-3 # usually a reasonable val
+        learning_rate = 5e-2 # usually a reasonable val
         LEN_FEATURE_VECTOR =      52    +          52      +     14*4     +  52   +   4    +    4
         #                    playerCards    claimedCards    playerBids   pile    tricks       
         
-        '''
+        
        # Auto create deep linear NN from just changing hidden
-        hidden = [100, 200, 100, 150 ,150, 200] ##Just change this
+        '''
+        hidden = [100, 200, 100] ##Just change this
         
         #######  Keep Here ############
         modules = [nn.Linear(LEN_FEATURE_VECTOR, hidden[0])]
@@ -174,10 +175,10 @@ class ModelTest(ModelPlayer):
             Unflatten(),
             nn.ReLU(),
             nn.Conv1d(in_channels=1, out_channels=4, kernel_size=5, padding=2),
-            nn.ReLU(),
-            nn.Conv1d(in_channels=4, out_channels=4, kernel_size=5, padding=2),
-            nn.ReLU(),
-            nn.Conv1d(in_channels=4, out_channels=4, kernel_size=3, padding=1),
+           # nn.ReLU(),
+           # nn.Conv1d(in_channels=4, out_channels=4, kernel_size=5, padding=2),
+           # nn.ReLU(),
+           # nn.Conv1d(in_channels=4, out_channels=4, kernel_size=3, padding=1),
             Flatten(),
             nn.Linear(4*100, 100),
             nn.ReLU(),
