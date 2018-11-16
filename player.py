@@ -61,12 +61,12 @@ class Player:
 
 
     def calculateScore(self, scoreFunction=regressionScore):
-        tricks = len(self.claimed) / 4
+        tricks = len(self.claimed) // 4
         subScore = scoreFunction(self, tricks)
         # Reset round state
         self.resetRound()
         self.score += subScore
-        print(self.name + " score: " + str(self.score))
+        
         return subScore
 
     def incorporateFeedback(self, newState, reward):
@@ -112,6 +112,7 @@ class Baseline(Player):
 
     def playCard(self, state, actions, pile):
         card = None
+        
         if len(pile) == 0:
             card = random.choice(actions)
         else:

@@ -29,6 +29,24 @@ class ModelPlayer(Baseline):
         self.numiters = 0
         self.model = model # evaluation function class
 
+    def declareBid(self, state):
+        # which bid gives us our best q?
+        if random.random() < .3:
+            choice = random.choice(range(13))
+            print("random choice: " + str(choice))
+            return choice
+        bestQ = (float("-inf"), None)
+        for i in range(0, 14):
+            state[2][0] = i
+            newQ = float(self.getQ(state, None))
+            print("NEWQ : " + str(newQ))
+            bestQ = max(bestQ, (newQ, i))
+        # Don't need to revert our bid cuz it will be overwritten
+        print("bestChoice: " + str(bestQ[1]))
+        return bestQ[1]
+        
+
+
     def getQ(self, state, actions):
         vector_features = self.featureExtractor(state, actions)
         output =  self.model.predict(vector_features)
@@ -51,7 +69,9 @@ class ModelPlayer(Baseline):
 
     def playCard(self, state, actions, pile=None):
         if random.random() < self.exploreProb:
-            return random.choice(actions)
+            chosen = random.choice(actions)
+            self.hand.remove(chosen)
+            return chosen
 
         # tuple hax
         score, chosen = max([(self.getQ(state,action), action) for action in actions])
@@ -137,4 +157,4 @@ class ModelTest(ModelPlayer):
             loss.backward()
             optimizer.step()
         testQModel = QModel(weights, pred, upd)
-        super().__init__(1, testQModel, utils.genActions, game.Game.stateFeatureExtractor, 0, hand, name)
+        super().__init__(1, testQModel, utils.genActions, game.Game.stateFeatureExtractor, .01, hand, name)

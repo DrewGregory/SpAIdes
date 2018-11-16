@@ -22,9 +22,10 @@ class Moderator:
         avgScoreDifferential = []
 
         self.roundCursor = 0
-        # while max((Game.END_SCORE,) + tuple([player.score for player in self.players])) == Game.END_SCORE:
+        #while max((Game.END_SCORE,) + tuple([player.score for player in self.game.players])) == Game.END_SCORE:
         for _ in range(5000):
             # Initialize round, deals cards and bids
+            
             shuffle(self.game.deck)
             for i in range(self.game.NUM_PLAYERS):
                 self.game.players[i].hand = self.game.deck[i * 13 : (i + 1) * 13]
@@ -35,7 +36,6 @@ class Moderator:
 
             # Play round through to completion
             while sum([len(p.hand) for p in self.game.players]) > 0:
-                self.game.pile = []
                 for i in range(self.game.NUM_PLAYERS):
                     player = self.game.players[(self.playerCursor + i) % self.game.NUM_PLAYERS]
                     actions = genActions(player.hand, self.game.pile, brokeSpades)
@@ -63,20 +63,21 @@ class Moderator:
                         else:
                             reward = 1
                     player.incorporateFeedback(playerState, reward)
-            
-            # Calculate scores
-            print("SCORES: \n --------")
-            bestScore = mean([x.calculateScore() for x in self.game.players if "AI" in x.name])
+
+                self.game.pile = []
+            aiScores = [x.calculateScore() for x in self.game.players if "AI" in x.name]
+            bestScore = mean(aiScores)
             testScore = ([x.calculateScore() for x in self.game.players if "Oracle" in x.name or "Test" in x.name])[0]
-            print(testScore - bestScore)
             avgScoreDifferential.append(testScore - bestScore)
             self.roundCursor = self.roundCursor + 1 % self.game.NUM_PLAYERS
+            if _ % 100 == 0:
+                # Calculate scores
+                print("SCORES: \n --------")
+                for score  in aiScores:
+                    print("Baseline score: " + str(score))
+                print("Model Score: " + str(testScore))
+                print(testScore - bestScore)
+                
 
-
-            # Incorporate Feedback From Game Score
-            for i in range(self.game.NUM_PLAYERS):
-                player = self.game.players[(self.playerCursor + i) % self.game.NUM_PLAYERS]
-                playerState = self.game.getPlayerGameState(player, (self.playerCursor + i) % self.game.NUM_PLAYERS)
-                player.incorporateFeedback(playerState, player.calculateScore())
 
         print(mean(avgScoreDifferential))
