@@ -34,7 +34,7 @@ class ModelPlayer(Baseline):
         # which bid gives us our best q?
         if random.random() < .05:
             choice = random.choice(range(13))
-            print("random choice: " + str(choice))
+            #print("random choice: " + str(choice))
             self.bid = choice
             return self.bid
         bestQ = (float("-inf"), None)
@@ -46,7 +46,7 @@ class ModelPlayer(Baseline):
             #print("NEWQ : " + str(newQ))
             bestQ = max(bestQ, (newQ, i))
         # Don't need to revert our bid cuz it will be overwritten
-        print("bestChoice: " + str(bestQ[1]))
+        #print("bestChoice: " + str(bestQ[1]))
         self.bid = bestQ[1]
         return self.bid
         '''

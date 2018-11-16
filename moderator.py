@@ -8,7 +8,7 @@ from utils import genActions, determineWinCardIndex
 
 class Moderator:
 
-    NUM_GAMES = 15000
+    NUM_GAMES = 2500
     
     def __init__(self, args):
         self.game = Game(args)
@@ -63,7 +63,7 @@ class Moderator:
                     player = self.game.players[playerIndex]
                     playerState = self.game.getPlayerGameState(player, playerIndex)
                     
-                    reward = 0  # default reward for no tricks won
+                    reward = 0 # default reward for no tricks won
 
                     # Give reward for winning, but penalize if it's overbidding
                     if playerIndex == winnerIndex:
@@ -83,10 +83,12 @@ class Moderator:
             if _ % 100 == 0:
                 # Calculate scores
                 print("SCORES: \n --------")
+                for player in self.game.players:
+                    print(player.name + ":  " + str(player.score))
                 for score  in otherScores:
                     print("Baseline score: " + str(score[2]), "Bid:", score[1], "Tricks Won:", score[0] )
+                    print("TOTAL: " + str())
                 print("Model Score: " + str(testScore[2]), "Bid: ", testScore[1], "Tricks Won: ", testScore[0] )
-                print(testScore[0] - bestScore)
                 
 
 
