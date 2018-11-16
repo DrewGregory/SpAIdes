@@ -17,14 +17,14 @@ class Game:
     def __init__(self, args):
         self.deck = ([Card(i) for i in range(Card.NUM_CARDS)])
         shuffle(self.deck)
-        self.players = [Oracle([], "AI Oracle " + str(i + 1))
+        self.players = [Baseline([], "Oracle AI" + str(i + 1))
                         for i in range(0, Game.NUM_PLAYERS - 1)]
         if args.human:
             self.players.append(Human([], "Human"))
         elif args.oracle:
             self.players.append(Oracle([], "Oracle"))
         else:
-            self.players.append(ModelTest([], "ModelTest"))
+            self.players.append(ModelTest([], "Model Test"))
             #self.players.append(Baseline([], "Test"))
         shuffle(self.players)
         self.pile = []
@@ -83,10 +83,13 @@ class Game:
         for cards in playerClaimedCards:
             for card in cards:
                 claimedF[card.index] = float(1)
-        
+
+        bidIndicators = [0] * Game.NUM_PLAYERS * 14
+        for i in range (0, Game.NUM_PLAYERS):
+            bidIndicators[i * 14 + playerBids[i]] = 1
         pileF = [float(0)] * Card.NUM_CARDS
         for i, card in enumerate(pile):
             pileF[card.index] = float(i + 1)
 
         tricksF = [float(len(c) // 4) for c in playerClaimedCards] # should divide evenly
-        return playerHandF + claimedF + playerBids +  pileF  + tricksF + playerBags
+        return playerHandF + claimedF + bidIndicators +  pileF  + tricksF + playerBags

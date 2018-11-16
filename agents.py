@@ -32,14 +32,16 @@ class ModelPlayer(Baseline):
 
     def declareBid(self, state):
         # which bid gives us our best q?
-        if random.random() < .3:
+        if random.random() < .05:
             choice = random.choice(range(13))
             print("random choice: " + str(choice))
             self.bid = choice
             return self.bid
         bestQ = (float("-inf"), None)
         for i in range(0, 14):
-            state[2][0] = i
+            newStateArr = [0] * 14
+            newStateArr[i] = 1
+            state[2] = newStateArr + state[2][14:]
             newQ = float(self.getQ(state, None))
             print("NEWQ : " + str(newQ))
             bestQ = max(bestQ, (newQ, i))
@@ -137,7 +139,7 @@ class ModelTest(ModelPlayer):
 
         
         learning_rate = 1e-3 # usually a reasonable val
-        LEN_FEATURE_VECTOR =      52    +          52      +      4     +  52   +   4    +    4
+        LEN_FEATURE_VECTOR =      52    +          52      +     14*4     +  52   +   4    +    4
         #                    playerCards    claimedCards    playerBids   pile    tricks       
         
         # Auto create deep linear NN from just changing hidden

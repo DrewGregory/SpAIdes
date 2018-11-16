@@ -74,18 +74,18 @@ class Moderator:
                     player.incorporateFeedback(playerState, reward)
 
                 self.game.pile = []
-            aiScores = [ (x.calculateScore(), x.bid, x.tricksWon(self.game.NUM_PLAYERS)) for x in self.game.players if "AI" in x.name]
-            bestScore = mean([x[0] for x in aiScores])
-            testScore = ([ (x.calculateScore(), x.bid, x.tricksWon(self.game.NUM_PLAYERS)) for x in self.game.players if "Oracle" in x.name or "Test" in x.name])[0]
+            otherScores = [ ( x.tricksWon(self.game.NUM_PLAYERS), x.bid, x.calculateScore()) for x in self.game.players if "AI" in x.name]
+            bestScore = mean([x[0] for x in otherScores])
+            testScore = ([ (x.tricksWon(self.game.NUM_PLAYERS), x.bid, x.calculateScore()) for x in self.game.players if "Test" in x.name])[0]
             
             avgScoreDifferential.append(testScore[0] - bestScore)
             self.roundCursor = self.roundCursor + 1 % self.game.NUM_PLAYERS
             if _ % 100 == 0:
                 # Calculate scores
                 print("SCORES: \n --------")
-                for score  in aiScores:
-                    print("Baseline score: " + str(score[0]), "Bid:", score[1], "Tricks Won:", score[2] )
-                print("Model Score: " + str(testScore[0]), "Bid: ", testScore[1], "Tricks Won: ", testScore[2] )
+                for score  in otherScores:
+                    print("Baseline score: " + str(score[2]), "Bid:", score[1], "Tricks Won:", score[2] )
+                print("Model Score: " + str(testScore[2]), "Bid: ", testScore[1], "Tricks Won: ", testScore[2] )
                 print(testScore[0] - bestScore)
                 
 
