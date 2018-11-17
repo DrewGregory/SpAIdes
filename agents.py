@@ -155,9 +155,10 @@ class ModelTest(ModelPlayer):
         LEN_FEATURE_VECTOR =      52    +          52      +     14*4     +  52   +   4    +    4
         #                    playerCards    claimedCards    playerBids   pile    tricks       
         
-        '''
+        
        # Auto create deep linear NN from just changing hidden
-        hidden = [100, 200, 100, 150 ,150, 200] ##Just change this
+        '''
+        hidden = [100, 200, 100] ##Just change this
         
         #######  Keep Here ############
         modules = [nn.Linear(LEN_FEATURE_VECTOR, hidden[0])]
@@ -172,16 +173,16 @@ class ModelTest(ModelPlayer):
 
         weights = nn.Sequential(
             nn.Linear(LEN_FEATURE_VECTOR, 100),
-            #Unflatten(),
-            #nn.ReLU(),
-            #nn.Conv1d(in_channels=1, out_channels=4, kernel_size=5, padding=2),
-            #nn.ReLU(),
-            #nn.Conv1d(in_channels=4, out_channels=4, kernel_size=5, padding=2),
-            #nn.ReLU(),
-            #nn.Conv1d(in_channels=4, out_channels=4, kernel_size=3, padding=1),
-            #Flatten(),
-            #nn.Linear(4*100, 100),
-            #nn.ReLU(),
+            Unflatten(),
+            nn.ReLU(),
+            nn.Conv1d(in_channels=1, out_channels=4, kernel_size=5, padding=2),
+           # nn.ReLU(),
+           # nn.Conv1d(in_channels=4, out_channels=4, kernel_size=5, padding=2),
+           # nn.ReLU(),
+           # nn.Conv1d(in_channels=4, out_channels=4, kernel_size=3, padding=1),
+            Flatten(),
+            nn.Linear(4*100, 100),
+            nn.ReLU(),
             nn.Linear(100, 1)
         )
 

@@ -18,7 +18,7 @@ class Player:
 
     # SCORING CONSTANTS
     USE_BAGS = True
-    BAGGING_COST = 100
+    BAGGING_COST = 50
 
     def __init__(self, hand, name=""):
         # TODO
@@ -55,12 +55,15 @@ class Player:
                 subScore -= self.BAGGING_COST
                 self.bags -= 10
         return subScore
+    
+    def justTricksScore(self, tricks):
+        return tricks * 10
 
     def tricksWon(self, numPlayers):
         return len(self.claimed) // numPlayers
 
 
-    def calculateScore(self, scoreFunction=regressionScore):
+    def calculateScore(self, scoreFunction=justTricksScore):
         tricks = len(self.claimed) // 4
         subScore = scoreFunction(self, tricks)
         # Reset round state

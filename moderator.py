@@ -8,7 +8,7 @@ from utils import genActions, determineWinCardIndex
 
 class Moderator:
 
-    NUM_GAMES = 2500
+    NUM_GAMES = 25000
     
     def __init__(self, args):
         self.game = Game(args)
@@ -68,11 +68,11 @@ class Moderator:
                     # Give reward for winning, but penalize if it's overbidding
                     if playerIndex == winnerIndex:
                         if player.tricksWon(self.game.NUM_PLAYERS) > player.bid:
-                            reward = -1.1
+                            reward = 0
                         else:
                             reward = 1
                     player.incorporateFeedback(playerState, reward)
-
+                self.playerCursor = winnerIndex
                 self.game.pile = []
                 return
             otherScores = [ ( x.tricksWon(self.game.NUM_PLAYERS), x.bid, x.calculateScore()) for x in self.game.players if "AI" in x.name]
