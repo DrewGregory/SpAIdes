@@ -1,4 +1,6 @@
 import numpy as np
+import matplotlib.pyplot as plt
+
 
 from card import Card
 from random import shuffle
@@ -8,7 +10,7 @@ from utils import genActions, determineWinCardIndex
 
 class Moderator:
 
-    NUM_GAMES = 25000
+    NUM_GAMES = int(1e3)
     
     def __init__(self, args):
         self.game = Game(args)
@@ -22,7 +24,7 @@ class Moderator:
         4) Play hands until out of cards
         """
         avgScoreDifferential = []
-
+        model_total = []
         self.roundCursor = 0
         # while max((Game.END_SCORE,) + tuple([player.score for player in self.players])) == Game.END_SCORE:
         for _ in range(Moderator.NUM_GAMES):
@@ -42,9 +44,11 @@ class Moderator:
 
             self.playerCursor = (self.roundCursor + 1) % self.game.NUM_PLAYERS # left of dealer
             brokeSpades = False
-
+            
+            numRotations = 0
             # Play round through to completion
             while sum([len(p.hand) for p in self.game.players]) > 0:
+                numRotations += 1
                 for i in range(self.game.NUM_PLAYERS):
                     player = self.game.players[(self.playerCursor + i) % self.game.NUM_PLAYERS]
                     actions = genActions(player.hand, self.game.pile, brokeSpades)
@@ -63,18 +67,18 @@ class Moderator:
                     player = self.game.players[playerIndex]
                     playerState = self.game.getPlayerGameState(player, playerIndex)
                     
-                    reward = 0 # default reward for no tricks won
+                    reward = ( min(player.tricksWon(self.game.NUM_PLAYERS) - player.bid, 0) ) /(13 - numRotations + 1) # default reward for no tricks won
 
                     # Give reward for winning, but penalize if it's overbidding
                     if playerIndex == winnerIndex:
                         if player.tricksWon(self.game.NUM_PLAYERS) > player.bid:
-                            reward = -1
+                            reward = -0.5
                         else:
                             reward = 1
                     player.incorporateFeedback(playerState, reward)
                 self.playerCursor = winnerIndex
                 self.game.pile = []
-                return
+                
             otherScores = [ ( x.tricksWon(self.game.NUM_PLAYERS), x.bid, x.calculateScore()) for x in self.game.players if "AI" in x.name]
             bestScore = mean([x[2] for x in otherScores])
             testScore = ([ (x.tricksWon(self.game.NUM_PLAYERS), x.bid, x.calculateScore()) for x in self.game.players if "Test" in x.name])[0]
@@ -82,6 +86,8 @@ class Moderator:
             avgScoreDifferential.append(testScore[2] - bestScore)
             self.roundCursor = self.roundCursor + 1 % self.game.NUM_PLAYERS
             if _ % 100 == 0:
+                mt = [ p for p in self.game.players if p.name=="Model Test"][0]
+                mt.save()
                 # Calculate scores
                 print("SCORES: \n --------")
                 for player in self.game.players:
@@ -89,5 +95,11 @@ class Moderator:
                 for score  in otherScores:
                     print("Baseline score: " + str(score[2]), "Bid:", score[1], "Tricks Won:", score[0] )
                     print("TOTAL: " + str())
+                
+                model_total.append(mt.score)
                 print("Model Score: " + str(testScore[2]), "Bid: ", testScore[1], "Tricks Won: ", testScore[0] )
+        
+
+        plt.plot(range(len(model_total)), model_total)
+        plt.show()
         print(mean(avgScoreDifferential))

@@ -63,7 +63,7 @@ class Player:
         return len(self.claimed) // numPlayers
 
 
-    def calculateScore(self, scoreFunction=justTricksScore):
+    def calculateScore(self, scoreFunction=regressionScore):
         tricks = len(self.claimed) // 4
         subScore = scoreFunction(self, tricks)
         # Reset round state

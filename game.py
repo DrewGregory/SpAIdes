@@ -97,4 +97,4 @@ class Game:
             pileF[card.index] = float(i + 1)
 
         tricksF = [float(len(c) // 4) for c in playerClaimedCards] # should divide evenly
-        return playerHandF + claimedF + playerBids + pileF + tricksF + playerBags + actions
+        return playerHandF + claimedF + playerBids +  pileF  + tricksF + playerBags + actions
