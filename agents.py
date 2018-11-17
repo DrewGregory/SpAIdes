@@ -152,7 +152,7 @@ class ModelTest(ModelPlayer):
 
         
         learning_rate = 5e-2 # usually a reasonable val
-        LEN_FEATURE_VECTOR =      52    +          52      +     14*4     +  52   +   4    +    4
+        LEN_FEATURE_VECTOR =      52    +          52      +     14*4     +  52   +  4  +  4  + 52
         #                    playerCards    claimedCards    playerBids   pile    tricks       
         
         

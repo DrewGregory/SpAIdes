@@ -76,20 +76,9 @@ class Game:
         NOTE: bags not included
         '''
         playerHand, playerClaimedCards, playerBids, playerBags, pile = state
-        if action: # Choosing a card.
-            playerHand.remove(action)
-            pile.add(action)
-        print("STATE: ")
-        print("PlayerHands: ")
-        print(playerHand)
-        print("PlayerClaimedCards:")
-        print(playerClaimedCards)
-        print("playerBids:")
-        print(playerBids)
-        print("playerBags:")
-        print(playerBags)
-        print("Pile:")
-        print(pile)
+        if action:
+            actions = [0] * 52
+            actions[action.index] = 1
         playerHandF = [float(0)] * Card.NUM_CARDS
         for card in playerHand:
             playerHandF[card.index] = float(1)
@@ -107,4 +96,4 @@ class Game:
             pileF[card.index] = float(i + 1)
 
         tricksF = [float(len(c) // 4) for c in playerClaimedCards] # should divide evenly
-        return playerHandF + claimedF + bidIndicators +  pileF  + tricksF + playerBags
+        return playerHandF + claimedF + bidIndicators +  pileF  + tricksF + playerBags + actions
