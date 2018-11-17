@@ -29,7 +29,7 @@ class ModelPlayer(Baseline):
         self.exploreProb = exploreProb
         self.numiters = 0
         self.model = model # evaluation function class
-    """
+
     def declareBid(self, state):
         # which bid gives us our best q?
         if random.random() < .05:
@@ -37,23 +37,24 @@ class ModelPlayer(Baseline):
             #print("random choice: " + str(choice))
             self.bid = choice
             return self.bid
-        bestQ = (float("-inf"), None)
+        bestQ = (float("-inf"), None)     
         for i in range(0, 14):
-            newStateArr = [0] * 14
-            newStateArr[i] = 1
-            state[2] = newStateArr + state[2][14:]
+            
+            state[2][0] = i
+            print("New state: " + str(state[2]))
             newQ = float(self.getQ(state, None))
             #print("NEWQ : " + str(newQ))
             bestQ = max(bestQ, (newQ, i))
         # Don't need to revert our bid cuz it will be overwritten
         #print("bestChoice: " + str(bestQ[1]))
         self.bid = bestQ[1]
+        print("BID " + str(self.bid))
         return self.bid
-        """
+    
 
-    def getQ(self, state, actions):
-        vector_features = self.featureExtractor(state, actions)
-        output =  self.model.predict(vector_features)
+    def getQ(self, state, action):
+        vector_features = self.featureExtractor(state, action)
+        output = self.model.predict(vector_features)
         return output
 
     def getStepSize(self):
@@ -131,6 +132,18 @@ class QModel:
         self.update_lambda(self.model, features, target)
 
 
+class Flatten(nn.Module):
+    def __init__(self):
+        super(Flatten, self).__init__()
+
+    def forward(self, x):
+        return x.view(-1)
+
+class Unflatten(nn.Module):
+    def __init__(self):
+        super(Unflatten, self).__init__()
+    def forward(self, x):
+        return x.view(1, 1,-1)
 
 ### Play test around
 class ModelTest(ModelPlayer):
@@ -138,12 +151,13 @@ class ModelTest(ModelPlayer):
     def __init__(self, hand, name=""):
 
         
-        learning_rate = 1e-3 # usually a reasonable val
+        learning_rate = 5e-2 # usually a reasonable val
         LEN_FEATURE_VECTOR =      52    +          52      +     14*4     +  52   +   4    +    4
         #                    playerCards    claimedCards    playerBids   pile    tricks       
         
-        # Auto create deep linear NN from just changing hidden
-        hidden = [100,  200] ##Just change this
+        '''
+       # Auto create deep linear NN from just changing hidden
+        hidden = [100, 200, 100, 150 ,150, 200] ##Just change this
         
         #######  Keep Here ############
         modules = [nn.Linear(LEN_FEATURE_VECTOR, hidden[0])]
@@ -154,6 +168,23 @@ class ModelTest(ModelPlayer):
         ######   KEEP HERE #########
         
         weights = nn.Sequential(*modules)
+        '''
+
+        weights = nn.Sequential(
+            nn.Linear(LEN_FEATURE_VECTOR, 100),
+            #Unflatten(),
+            #nn.ReLU(),
+            #nn.Conv1d(in_channels=1, out_channels=4, kernel_size=5, padding=2),
+            #nn.ReLU(),
+            #nn.Conv1d(in_channels=4, out_channels=4, kernel_size=5, padding=2),
+            #nn.ReLU(),
+            #nn.Conv1d(in_channels=4, out_channels=4, kernel_size=3, padding=1),
+            #Flatten(),
+            #nn.Linear(4*100, 100),
+            #nn.ReLU(),
+            nn.Linear(100, 1)
+        )
+
 
         criterion = nn.MSELoss()
         optimizer = optim.Adam(weights.parameters(), lr=learning_rate, weight_decay=1e-4)
@@ -161,7 +192,6 @@ class ModelTest(ModelPlayer):
         if cuda.is_available():
             weights = weights.cuda()
             criterion = criterion.cuda()
-            
 
 
         def pred(weights, features):
@@ -179,6 +209,7 @@ class ModelTest(ModelPlayer):
             
             current_estimate = weights(features)
             loss = criterion(current_estimate, t)
+            print("Loss: " + str(loss))
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()

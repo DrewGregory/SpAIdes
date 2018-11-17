@@ -74,6 +74,7 @@ class Moderator:
                     player.incorporateFeedback(playerState, reward)
 
                 self.game.pile = []
+                return
             otherScores = [ ( x.tricksWon(self.game.NUM_PLAYERS), x.bid, x.calculateScore()) for x in self.game.players if "AI" in x.name]
             bestScore = mean([x[2] for x in otherScores])
             testScore = ([ (x.tricksWon(self.game.NUM_PLAYERS), x.bid, x.calculateScore()) for x in self.game.players if "Test" in x.name])[0]
@@ -89,7 +90,4 @@ class Moderator:
                     print("Baseline score: " + str(score[2]), "Bid:", score[1], "Tricks Won:", score[0] )
                     print("TOTAL: " + str())
                 print("Model Score: " + str(testScore[2]), "Bid: ", testScore[1], "Tricks Won: ", testScore[0] )
-                
-
-
         print(mean(avgScoreDifferential))

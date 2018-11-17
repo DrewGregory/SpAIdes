@@ -61,7 +61,7 @@ class Game:
         return [playerHands, playerClaimedCards, playerBids, playerBags, self.pile, ]
 
     @staticmethod
-    def stateFeatureExtractor(state, actions):
+    def stateFeatureExtractor(state, action):
         '''
         @return np.array feature vector
         Features:
@@ -74,7 +74,20 @@ class Game:
         NOTE: bags not included
         '''
         playerHand, playerClaimedCards, playerBids, playerBags, pile = state
-
+        if action: # Choosing a card.
+            playerHand.remove(action)
+            pile.add(action)
+        print("STATE: ")
+        print("PlayerHands: ")
+        print(playerHand)
+        print("PlayerClaimedCards:")
+        print(playerClaimedCards)
+        print("playerBids:")
+        print(playerBids)
+        print("playerBags:")
+        print(playerBags)
+        print("Pile:")
+        print(pile)
         playerHandF = [float(0)] * Card.NUM_CARDS
         for card in playerHand:
             playerHandF[card.index] = float(1)
