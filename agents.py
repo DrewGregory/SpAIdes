@@ -41,14 +41,12 @@ class ModelPlayer(Baseline):
         for i in range(0, 14):
             
             state[2][0] = i
-            print("New state: " + str(state[2]))
             newQ = float(self.getQ(state, None))
             #print("NEWQ : " + str(newQ))
             bestQ = max(bestQ, (newQ, i))
         # Don't need to revert our bid cuz it will be overwritten
         #print("bestChoice: " + str(bestQ[1]))
         self.bid = bestQ[1]
-        print("BID " + str(self.bid))
         return self.bid
     
 
@@ -152,7 +150,7 @@ class ModelTest(ModelPlayer):
 
         
         learning_rate = 5e-2 # usually a reasonable val
-        LEN_FEATURE_VECTOR =      52    +          52      +     14*4     +  52   +  4  +  4  + 52
+        LEN_FEATURE_VECTOR =      52    +          52      +     4    +  52   +  4  +  4  + 52
         #                    playerCards    claimedCards    playerBids   pile    tricks       
         
         

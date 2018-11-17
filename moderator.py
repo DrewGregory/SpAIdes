@@ -68,7 +68,7 @@ class Moderator:
                     # Give reward for winning, but penalize if it's overbidding
                     if playerIndex == winnerIndex:
                         if player.tricksWon(self.game.NUM_PLAYERS) > player.bid:
-                            reward = 0
+                            reward = -1
                         else:
                             reward = 1
                     player.incorporateFeedback(playerState, reward)

@@ -88,12 +88,13 @@ class Game:
             for card in cards:
                 claimedF[card.index] = float(1)
 
-        bidIndicators = [0] * Game.NUM_PLAYERS * 14
+        """bidIndicators = [0] * Game.NUM_PLAYERS * 14
         for i in range (0, Game.NUM_PLAYERS):
             bidIndicators[i * 14 + playerBids[i]] = 1
+        """
         pileF = [float(0)] * Card.NUM_CARDS
         for i, card in enumerate(pile):
             pileF[card.index] = float(i + 1)
 
         tricksF = [float(len(c) // 4) for c in playerClaimedCards] # should divide evenly
-        return playerHandF + claimedF + bidIndicators +  pileF  + tricksF + playerBags + action
+        return playerHandF + claimedF + playerBids + pileF + tricksF + playerBags + actions
