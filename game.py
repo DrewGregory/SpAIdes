@@ -76,8 +76,8 @@ class Game:
         NOTE: bags not included
         '''
         playerHand, playerClaimedCards, playerBids, playerBags, pile = state
+        actions = [0] * 52
         if action:
-            actions = [0] * 52
             actions[action.index] = 1
         playerHandF = [float(0)] * Card.NUM_CARDS
         for card in playerHand:
