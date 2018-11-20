@@ -52,8 +52,12 @@ class ModelPlayer(Baseline):
         #print("bestChoice: " + str(bestQ[1]))
         assert not bestQ[0] == None
         self.bid = bestQ[1]
+<<<<<<< HEAD
         #print("BID " + str(self.bid))
         
+=======
+        print("BID " + str(self.bid))
+>>>>>>> 8c1a4812c1a1bbf0a02a7c8b2b3fbb50c3fad4fc
         return self.bid
     
 
@@ -179,15 +183,19 @@ class ModelTest(ModelPlayer):
     def __init__(self, hand, name=""):
 
         
+<<<<<<< HEAD
         learning_rate = 1e-3 # usually a reasonable val
         LEN_FEATURE_VECTOR = 57 # 52    +          52      +     14*4     +  52   +  4  +  4  + 52
+=======
+        learning_rate = 5e-2 # usually a reasonable val
+        LEN_FEATURE_VECTOR =      52    +          52      +     4    +  52   +  4  +  4  + 52
+>>>>>>> 8c1a4812c1a1bbf0a02a7c8b2b3fbb50c3fad4fc
         #                    playerCards    claimedCards    playerBids   pile    tricks       
         
         
        # Auto create deep linear NN from just changing hidden
         '''
         hidden = [100, 200, 100] ##Just change this
-        
         #######  Keep Here ############
         modules = [nn.Linear(LEN_FEATURE_VECTOR, hidden[0])]
         for i in range(len(hidden)-1 ):
