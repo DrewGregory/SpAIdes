@@ -1,5 +1,5 @@
 from card import Card
-from random import shuffle
+from random import shuffle, randint
 from player import Human, Baseline, Idiot, Oracle
 from agents import ModelPlayer, QModel, ModelTest
 
@@ -21,6 +21,7 @@ class Game:
                         for i in range(0, Game.NUM_PLAYERS - 1)]
         if args.human:
             self.players.append(Human([], "Human"))
+            self.players[-2] = ModelTest([], "Model Test")
         elif args.oracle:
             self.players.append(Oracle([], "Oracle"))
         elif args.idiot:
@@ -76,6 +77,8 @@ class Game:
         NOTE: bags not included
         '''
         playerHand, playerClaimedCards, playerBids, playerBags, pile = state
+        
+        '''
         actions = [0] * 52
         if action:
             actions[action.index] = 1
@@ -97,3 +100,22 @@ class Game:
 
         tricksF = [float(len(c) // 4) for c in playerClaimedCards] # should divide evenly
         return playerHandF + claimedF + bidIndicators +  pileF  + tricksF + playerBags + actions
+        '''
+        cards = [float(0)]*52
+        for card in playerHand:
+            cards[card.index] = 1
+        for card in pile:
+            cards[card.index] = 5
+        for i in range(len(playerClaimedCards)):
+            claimed = playerClaimedCards[i]
+            for card in claimed:
+                cards[card.index] = i + 2
+        return cards + [float(b) for b in playerBids] + [float(action.index if not action is None else -1)]# 52 + 4 + 1
+        
+
+    @staticmethod
+    def genActionParams(state):
+        playerHand, playerClaimedCards, playerBids, playerBags, pile = state
+
+        broke = any(p.getSuit() == Card.SPADES_SUIT for p in pile)
+        return playerHand, pile, broke

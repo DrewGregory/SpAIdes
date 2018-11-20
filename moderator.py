@@ -1,19 +1,25 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from tensorboardX import SummaryWriter
+import random
+from random import shuffle
+from statistics import mean
 
 
 from card import Card
-from random import shuffle
 from game import Game
-from statistics import mean
 from utils import genActions, determineWinCardIndex
+import utils
+
 
 class Moderator:
 
     NUM_GAMES = int(1e4)
-    
+    TEST = 1
     def __init__(self, args):
         self.game = Game(args)
+       # self.writer = SummaryWriter()
+
 
     def playGame(self):
         """
@@ -28,9 +34,14 @@ class Moderator:
         self.roundCursor = 0
         # while max((Game.END_SCORE,) + tuple([player.score for player in self.players])) == Game.END_SCORE:
         for _ in range(Moderator.NUM_GAMES):
+            random.seed(_ % Moderator.TEST)
+            self.roundCursor = 0
+            self.game.deck = [Card(i) for i in range(Card.NUM_CARDS)]
             # Initialize round, deals cards and bids
             
             shuffle(self.game.deck)
+            if _==0:
+                print(self.game.deck)
             if _%100 == 0:
                 print("BIDS: \n ------")
 
@@ -67,26 +78,42 @@ class Moderator:
                     player = self.game.players[playerIndex]
                     playerState = self.game.getPlayerGameState(player, playerIndex)
                     
-                    reward = ( min(player.tricksWon(self.game.NUM_PLAYERS) - player.bid, 0) ) /(13 - numRotations + 1) # default reward for no tricks won
-
+                    reward = 0#( min(player.tricksWon(self.game.NUM_PLAYERS) - player.bid, 0) ) /(13 - numRotations + 1) # default reward for no tricks won
+                   
                     # Give reward for winning, but penalize if it's overbidding
                     if playerIndex == winnerIndex:
                         if player.tricksWon(self.game.NUM_PLAYERS) > player.bid:
-                            reward = -0.5
+                            reward = 0 #-0.5
                         else:
                             reward = 1
+                    '''
+                    if numRotations ==13:
+                        reward = player.calculateScore(reset=False, scoreFunction=lambda s,t:player.simpleScore(t))
+                    '''
                     player.incorporateFeedback(playerState, reward)
+                    
                 self.playerCursor = winnerIndex
                 self.game.pile = []
+
+
+            ### Logging ####
+            mt = [ p for p in self.game.players if p.name=="Model Test"][0]
+            utils.TWriter.add_scalar('data/bid', mt.bid, _)
+            logScores = {}
+            for p in self.game.players:
+                logScores[p.name] = p.tricksWon()#p.score
+            utils.TWriter.add_scalars('data/scores'+str(_%Moderator.TEST), logScores, _)
                 
+            #### END Logging ####
             otherScores = [ ( x.tricksWon(self.game.NUM_PLAYERS), x.bid, x.calculateScore()) for x in self.game.players if "AI" in x.name]
             bestScore = mean([x[2] for x in otherScores])
             testScore = ([ (x.tricksWon(self.game.NUM_PLAYERS), x.bid, x.calculateScore()) for x in self.game.players if "Test" in x.name])[0]
             
             avgScoreDifferential.append(testScore[2] - bestScore)
             self.roundCursor = self.roundCursor + 1 % self.game.NUM_PLAYERS
+            
             if _ % 100 == 0:
-                mt = [ p for p in self.game.players if p.name=="Model Test"][0]
+                
                 mt.save()
                 # Calculate scores
                 print("SCORES: \n --------")

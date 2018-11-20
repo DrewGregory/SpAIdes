@@ -1,3 +1,10 @@
+
+
+from tensorboardX import SummaryWriter
+
+TWriter = SummaryWriter()
+
+
 def genActions(hand, pile, brokeSpades):
     """
     @param list hand: player's hand

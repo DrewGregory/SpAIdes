@@ -31,15 +31,16 @@ class ModelPlayer(Baseline):
         self.exploreProb = exploreProb
         self.numiters = 0
         self.model = model # evaluation function class
+        self.actions = actions
 
     def declareBid(self, state):
         # which bid gives us our best q?
-        if random.random() < .05:
+        if random.random() < 0:
             choice = random.choice(range(13))
             #print("random choice: " + str(choice))
             self.bid = choice
             return self.bid
-        bestQ = (float("-inf"), None)     
+        bestQ = (float("-inf"), 0) #0 because weird errors with None
         for i in range(0, 14):
             
             state[2][0] = i
@@ -49,8 +50,10 @@ class ModelPlayer(Baseline):
             bestQ = max(bestQ, (newQ, i))
         # Don't need to revert our bid cuz it will be overwritten
         #print("bestChoice: " + str(bestQ[1]))
+        assert not bestQ[0] == None
         self.bid = bestQ[1]
         #print("BID " + str(self.bid))
+        
         return self.bid
     
 
@@ -70,20 +73,24 @@ class ModelPlayer(Baseline):
     def personalFeedback(self, state, action, reward, newState):
         self.numiters += 1
         vector_features = self.featureExtractor(state, action)
-        target = reward + self.discount * self.getQ(newState, action)
+        # get best action for next state
+        nextActions =  self.actions(*game.Game.genActionParams(newState))
+        nextQs = [(self.getQ(newState, a) , a) for a in nextActions]
+        nextBestQ = (max(nextQs))[0] if len(nextQs) > 0 else 0
+        target = reward + self.discount * nextBestQ
         self.model.update(vector_features, target)
 
 
     def playCard(self, state, actions, pile=None):
         if random.random() < self.exploreProb:
             chosen = random.choice(actions)
+        else:
+            # tuple hax
+            score, chosen = max([(self.getQ(state,action), action) for action in actions])
             self.hand.remove(chosen)
-            return chosen
 
-        # tuple hax
-        score, chosen = max([(self.getQ(state,action), action) for action in actions])
-        self.hand.remove(chosen)
         self.playHistory.append((state, chosen))
+        #print("MODEL PLAYED:", chosen)
         return chosen
 
 
@@ -124,7 +131,7 @@ class QModel:
         self.model = model
         self.predict_lambda = predict_lambda
         self.update_lambda = update_lambda
-        self.writer = SummaryWriter()
+        #self.writer = SummaryWriter()
         self.num_iters = 0
 
     
@@ -136,8 +143,7 @@ class QModel:
         self.num_iters += 1
         features = torch.tensor(features)
         loss = self.update_lambda(self.model, features, target)
-        self.writer.add_scalar('data/loss', loss, self.num_iters)
-
+        utils.TWriter.add_scalar('data/loss', loss, self.num_iters)
 
 class Flatten(nn.Module):
     def __init__(self):
@@ -156,18 +162,30 @@ class Unflatten(nn.Module):
 class ModelTest(ModelPlayer):
 
     def save(self, path="./qmodel"):
-        torch.save(self.testQModel.model, path)
+
+        state = {
+            "model": self.weights.state_dict(),
+            "optimizer": self.optimizer.state_dict(),
+        }
+        torch.save(state, path+str(self.name))
+
+    def load(self, model, optimizer, path="./qmodel"):
+        checkpoint = torch.load(path)
+        model.load_state_dict(checkpoint['model'])
+        optimizer.load_state_dict(checkpoint['optimizer'])
+    
+
 
     def __init__(self, hand, name=""):
 
         
-        learning_rate = 5e-2 # usually a reasonable val
-        LEN_FEATURE_VECTOR =      52    +          52      +     14*4     +  52   +  4  +  4  + 52
+        learning_rate = 1e-3 # usually a reasonable val
+        LEN_FEATURE_VECTOR = 57 # 52    +          52      +     14*4     +  52   +  4  +  4  + 52
         #                    playerCards    claimedCards    playerBids   pile    tricks       
         
         
        # Auto create deep linear NN from just changing hidden
-        
+        '''
         hidden = [100, 200, 100] ##Just change this
         
         #######  Keep Here ############
@@ -182,29 +200,31 @@ class ModelTest(ModelPlayer):
         '''
 
         weights = nn.Sequential(
-            nn.Linear(LEN_FEATURE_VECTOR, 300),
+            nn.Linear(LEN_FEATURE_VECTOR, 40),
             Unflatten(),
             nn.ReLU(),
             nn.Conv1d(in_channels=1, out_channels=4, kernel_size=5, padding=2),
             nn.ReLU(),
-           # nn.Conv1d(in_channels=4, out_channels=4, kernel_size=5, padding=2),
-           # nn.ReLU(),
+            nn.Conv1d(in_channels=4, out_channels=4, kernel_size=5, padding=2),
+            nn.ReLU(),
             nn.Conv1d(in_channels=4, out_channels=4, kernel_size=3, padding=1),
             Flatten(),
-           # nn.Linear(4*100, 100),
-           # nn.ReLU(),
-            nn.Linear(4*300, 1)
+            nn.Linear(4*40, 100),
+            nn.ReLU(),
+            nn.Linear(100, 1)
         )
-        '''
-        #weights = torch.load("./qmodel")
+        
+        
 
-        criterion = nn.MSELoss()
-        optimizer = optim.Adam(weights.parameters(), lr=learning_rate, weight_decay=1e-4)
+        criterion = nn.SmoothL1Loss()
+        optimizer = optim.Adam(weights.parameters(), lr=learning_rate, weight_decay=0)
+        
         # setup gpu computing
         if cuda.is_available():
             weights = weights.cuda()
             criterion = criterion.cuda()
-
+            print("cuda'd optimizer")
+        #   self.load(weights, optimizer)
 
         def pred(weights, features):
             with torch.no_grad():
@@ -226,5 +246,7 @@ class ModelTest(ModelPlayer):
             loss.backward()
             optimizer.step()
             return loss
+        self.optimizer = optimizer
+        self.weights = weights
         self.testQModel = QModel(weights, pred, upd)
-        super().__init__(1, self.testQModel, utils.genActions, game.Game.stateFeatureExtractor, .01, hand, name)
+        super().__init__(1, self.testQModel, utils.genActions, game.Game.stateFeatureExtractor, 0.05, hand, name)

@@ -18,7 +18,7 @@ class Player:
 
     # SCORING CONSTANTS
     USE_BAGS = True
-    BAGGING_COST = 50
+    BAGGING_COST = 100
 
     def __init__(self, hand, name=""):
         # TODO
@@ -59,15 +59,21 @@ class Player:
     def justTricksScore(self, tricks):
         return tricks * 10
 
-    def tricksWon(self, numPlayers):
+    def tricksWon(self, numPlayers=4):
         return len(self.claimed) // numPlayers
 
+    def simpleScore(self, tricks):
+        sub = -abs(tricks-self.bid)*10 + min(tricks-self.bid, 0)
+        if tricks >= self.bid:
+            sub += self.bid*10
+        return sub
 
-    def calculateScore(self, scoreFunction=regressionScore):
+    def calculateScore(self, reset=True, scoreFunction=regressionScore):
         tricks = len(self.claimed) // 4
         subScore = scoreFunction(self, tricks)
         # Reset round state
-        self.resetRound()
+        if reset:
+            self.resetRound()
         self.score += subScore
         
         return subScore
@@ -95,6 +101,7 @@ class Human(Player):
         print("Possible Cards: " + str(actions))
         print("Claimed cards: " + str(self.claimed))
         print("Tricks so far: %d \t Bid: %d" % (len(self.claimed)/4, self.bid))
+        print(state)
         overly_large_index = 1000
         chosenIndex = overly_large_index
         while chosenIndex >= len(actions):
@@ -120,7 +127,7 @@ class Baseline(Player):
         card = None
         
         if len(pile) == 0:
-            card = random.choice(actions)
+            card = actions[0]#random.choice(actions)
         else:
             # find highest card
             chosenIndex = 0
