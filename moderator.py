@@ -14,13 +14,8 @@ import utils
 
 class Moderator:
 
-<<<<<<< HEAD
     NUM_GAMES = int(1e4)
     TEST = 1
-=======
-    NUM_GAMES = int(1e3)
-    
->>>>>>> 8c1a4812c1a1bbf0a02a7c8b2b3fbb50c3fad4fc
     def __init__(self, args):
         self.game = Game(args)
        # self.writer = SummaryWriter()
