@@ -14,9 +14,10 @@ import utils
 
 class Moderator:
 
-    TEST = 13242
+    TEST = 1
     NUM_GAMES = int(1e3)
-    LOGGING = False
+    LOGGING = True
+
     
     def __init__(self, args):
         self.game = Game(args)
