@@ -1,5 +1,3 @@
-
-
 from tensorboardX import SummaryWriter
 
 TWriter = SummaryWriter()

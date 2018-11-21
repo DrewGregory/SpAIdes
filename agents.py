@@ -6,7 +6,6 @@ import torch
 from tensorboardX import SummaryWriter
 
 
-
 from player import Player, Baseline
 import random
 import game

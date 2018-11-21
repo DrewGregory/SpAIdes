@@ -41,7 +41,7 @@ class Game:
         oracleGameState = self.getOracleGameState(playerCursor)
         # Remove other player hands...
         # replace with just our player's hand
-        if not "Oracle" in player.name:  # @GriffinKardos...when you make your oracle class change this
+        if not "Oracle" in player.name:
             oracleGameState[0] = player.hand
         return oracleGameState
 
@@ -66,22 +66,24 @@ class Game:
     @staticmethod
     def stateFeatureExtractor(state, action):
         '''
-        @return np.array feature vector
+        @return [float] feature vector as one concatenated list
         Features:
-        1. playerHandF: [int], len 52
-        2. claimedF: [int], len 52, among all players
-        3. playerBids: [int], len 4
-        4. pileF: [map], len 52
-        5. tricksF: [int], len 4, number of bids each player has
-        NOTE: do not call this method using the oracle
-        NOTE: bags not included
+        1. actions: [float], indicator for card played
+        2. playerHandF: [float], indicators for player's hand
+        3. claimedF: [float], indicators for all players' claimed
+        4. playerBids: [float], bids/player
+        5. pileF: [float], indicators for all cards in pile
+        6. tricksF: [float], tricks/player
+        7. playerBags: [float], bags/player
+        NOTE: This method should not be called using the oracle, has no
+        support for multiple player hands
         '''
         playerHand, playerClaimedCards, playerBids, playerBags, pile = state
         
-        
-        actions = [0] * 52
+        actions = [0] * Card.NUM_CARDS
         if action:
-            actions[action.index] = 1
+            actions[action.index] = float(1)
+        
         playerHandF = [float(0)] * Card.NUM_CARDS
         for card in playerHand:
             playerHandF[card.index] = float(1)
@@ -91,29 +93,14 @@ class Game:
             for card in cards:
                 claimedF[card.index] = float(1)
 
-        """bidIndicators = [0] * Game.NUM_PLAYERS * 14
-        for i in range (0, Game.NUM_PLAYERS):
-            bidIndicators[i * 14 + playerBids[i]] = 1
-        """
+        # value corresponds to index of card in pile
         pileF = [float(0)] * Card.NUM_CARDS
         for i, card in enumerate(pile):
             pileF[card.index] = float(i + 1)
 
         tricksF = [float(len(c) // 4) for c in playerClaimedCards] # should divide evenly
-        return playerHandF + claimedF + playerBids +  pileF  + tricksF + playerBags + actions
-        '''
-        cards = [float(0)]*52
-        for card in playerHand:
-            cards[card.index] = 1
-        for card in pile:
-            cards[card.index] = 5
-        for i in range(len(playerClaimedCards)):
-            claimed = playerClaimedCards[i]
-            for card in claimed:
-                cards[card.index] = i + 2
-        return cards + [float(b) for b in playerBids] + [float(action.index if not action is None else -1)]# 52 + 4 + 1
-        '''
-        
+
+        return playerHandF + claimedF + playerBids +  pileF + tricksF + playerBags + actions
 
     @staticmethod
     def genActionParams(state):
