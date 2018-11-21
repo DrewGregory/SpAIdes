@@ -52,8 +52,7 @@ class ModelPlayer(Baseline):
         #print("bestChoice: " + str(bestQ[1]))
         assert not bestQ[0] == None
         self.bid = bestQ[1]
-        #print("BID " + str(self.bid))
-        
+        print("BID " + str(self.bid))
         return self.bid
     
 
@@ -74,10 +73,13 @@ class ModelPlayer(Baseline):
         self.numiters += 1
         vector_features = self.featureExtractor(state, action)
         # get best action for next state
+        
         nextActions =  self.actions(*game.Game.genActionParams(newState))
+        print(nextActions)
         nextQs = [(self.getQ(newState, a) , a) for a in nextActions]
         nextBestQ = (max(nextQs))[0] if len(nextQs) > 0 else 0
         target = reward + self.discount * nextBestQ
+        print("TARGET: " + str(reward) + " " + str(nextBestQ))
         self.model.update(vector_features, target)
 
 
@@ -143,7 +145,8 @@ class QModel:
         self.num_iters += 1
         features = torch.tensor(features)
         loss = self.update_lambda(self.model, features, target)
-        utils.TWriter.add_scalar('data/loss', loss, self.num_iters)
+        if False: # TODO: Re enable
+            utils.TWriter.add_scalar('data/loss', loss, self.num_iters)
 
 class Flatten(nn.Module):
     def __init__(self):
@@ -179,8 +182,13 @@ class ModelTest(ModelPlayer):
     def __init__(self, hand, name=""):
 
         
+<<<<<<< HEAD
         learning_rate = 5e-5 # usually a reasonable val
         LEN_FEATURE_VECTOR = 57 # 52    +          52      +     14*4     +  52   +  4  +  4  + 52
+=======
+        learning_rate = 5e-2 # usually a reasonable val
+        LEN_FEATURE_VECTOR =      52    +          52      +     4    +  52   +  4  +  4  + 52
+>>>>>>> 1219fb49c07ef8a0a70a75cea063589072b10985
         #                    playerCards    claimedCards    playerBids   pile    tricks       
         
         
@@ -239,6 +247,8 @@ class ModelTest(ModelPlayer):
                 t = t.cuda()
             
             current_estimate = weights(features)
+            if target < 10:
+                print(str(current_estimate) + " " + str(target))
             loss = criterion(current_estimate, t)
             #print("Loss: " + str(loss))
             optimizer.zero_grad()

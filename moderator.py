@@ -14,8 +14,10 @@ import utils
 
 class Moderator:
 
-    NUM_GAMES = int(1e4)
-    TEST = 1
+    TEST = 13242
+    NUM_GAMES = int(1e3)
+    LOGGING = False
+    
     def __init__(self, args):
         self.game = Game(args)
        # self.writer = SummaryWriter()
@@ -97,12 +99,13 @@ class Moderator:
 
 
             ### Logging ####
-            mt = [ p for p in self.game.players if p.name=="Model Test"][0]
-            utils.TWriter.add_scalar('data/bid', mt.bid, _)
-            logScores = {}
-            for p in self.game.players:
-                logScores[p.name] = p.tricksWon()#p.score
-            utils.TWriter.add_scalars('data/scores'+str(_%Moderator.TEST), logScores, _)
+            if Moderator.LOGGING:
+                mt = [ p for p in self.game.players if p.name=="Model Test"][0]
+                utils.TWriter.add_scalar('data/bid', mt.bid, _)
+                logScores = {}
+                for p in self.game.players:
+                    logScores[p.name] = p.tricksWon()#p.score
+                utils.TWriter.add_scalars('data/scores'+str(_%Moderator.TEST), logScores, _)
                 
             #### END Logging ####
             otherScores = [ ( x.tricksWon(self.game.NUM_PLAYERS), x.bid, x.calculateScore()) for x in self.game.players if "AI" in x.name]
@@ -113,8 +116,8 @@ class Moderator:
             self.roundCursor = self.roundCursor + 1 % self.game.NUM_PLAYERS
             
             if _ % 100 == 0:
-                
-                mt.save()
+                if Moderator.LOGGING:
+                    mt.save()
                 # Calculate scores
                 print("SCORES: \n --------")
                 for player in self.game.players:
@@ -122,8 +125,8 @@ class Moderator:
                 for score  in otherScores:
                     print("Baseline score: " + str(score[2]), "Bid:", score[1], "Tricks Won:", score[0] )
                     print("TOTAL: " + str())
-                
-                model_total.append(mt.score)
+                if Moderator.LOGGING:
+                    model_total.append(mt.score)
                 print("Model Score: " + str(testScore[2]), "Bid: ", testScore[1], "Tricks Won: ", testScore[0] )
         
 
