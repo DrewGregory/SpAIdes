@@ -34,15 +34,19 @@ class ModelPlayer(Baseline):
         self.actions = actions
 
     def declareBid(self, state):
-        # which bid gives us our best q?
+        # confidence interval
+        ci = float(1 / self.numIters)
+        # find min and max bounds
+        lower, upper = 0, 13
+        
         if random.random() < 0:
             choice = random.choice(range(13))
             #print("random choice: " + str(choice))
             self.bid = choice
             return self.bid
+
         bestQ = (float("-inf"), 0) #0 because weird errors with None
         for i in range(0, 14):
-            
             state[2][0] = i
             #print("New state: " + str(state[2]))
             newQ = float(self.getQ(state, None))
@@ -84,6 +88,7 @@ class ModelPlayer(Baseline):
 
 
     def playCard(self, state, actions, pile=None):
+        # eps
         if random.random() < self.exploreProb:
             chosen = random.choice(actions)
         else:
