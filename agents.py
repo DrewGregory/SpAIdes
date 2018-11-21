@@ -179,7 +179,7 @@ class ModelTest(ModelPlayer):
     def __init__(self, hand, name=""):
 
         
-        learning_rate = 1e- # usually a reasonable val
+        learning_rate = 5e-5 # usually a reasonable val
         LEN_FEATURE_VECTOR = 57 # 52    +          52      +     14*4     +  52   +  4  +  4  + 52
         #                    playerCards    claimedCards    playerBids   pile    tricks       
         
