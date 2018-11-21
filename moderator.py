@@ -14,15 +14,10 @@ import utils
 
 class Moderator:
 
-<<<<<<< HEAD
     TEST = 13242
     NUM_GAMES = int(1e3)
     LOGGING = False
     
-=======
-    NUM_GAMES = int(1e4)
-    TEST = 1
->>>>>>> 99d292d64e5476eb61c2a114439237e2a40fd7c5
     def __init__(self, args):
         self.game = Game(args)
        # self.writer = SummaryWriter()
