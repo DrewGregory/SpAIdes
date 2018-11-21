@@ -52,7 +52,12 @@ class ModelPlayer(Baseline):
         #print("bestChoice: " + str(bestQ[1]))
         assert not bestQ[0] == None
         self.bid = bestQ[1]
+<<<<<<< HEAD
         print("BID " + str(self.bid))
+=======
+        #print("BID " + str(self.bid))
+        
+>>>>>>> 99d292d64e5476eb61c2a114439237e2a40fd7c5
         return self.bid
     
 
@@ -89,8 +94,8 @@ class ModelPlayer(Baseline):
         else:
             # tuple hax
             score, chosen = max([(self.getQ(state,action), action) for action in actions])
-            
         self.hand.remove(chosen)
+
         self.playHistory.append((state, chosen))
         #print("MODEL PLAYED:", chosen)
         return chosen
@@ -182,8 +187,13 @@ class ModelTest(ModelPlayer):
     def __init__(self, hand, name=""):
 
         
+<<<<<<< HEAD
         learning_rate = 5e-2 # usually a reasonable val
         LEN_FEATURE_VECTOR =      52    +          52      +     4    +  52   +  4  +  4  + 52
+=======
+        learning_rate = 1e- # usually a reasonable val
+        LEN_FEATURE_VECTOR = 57 # 52    +          52      +     14*4     +  52   +  4  +  4  + 52
+>>>>>>> 99d292d64e5476eb61c2a114439237e2a40fd7c5
         #                    playerCards    claimedCards    playerBids   pile    tricks       
         
         
