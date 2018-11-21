@@ -52,7 +52,7 @@ class ModelPlayer(Baseline):
         #print("bestChoice: " + str(bestQ[1]))
         assert not bestQ[0] == None
         self.bid = bestQ[1]
-        print("BID " + str(self.bid))
+        #print("BID " + str(self.bid))
         return self.bid
     
 
@@ -75,11 +75,11 @@ class ModelPlayer(Baseline):
         # get best action for next state
         
         nextActions =  self.actions(*game.Game.genActionParams(newState))
-        print(nextActions)
+        #print(nextActions)
         nextQs = [(self.getQ(newState, a) , a) for a in nextActions]
         nextBestQ = (max(nextQs))[0] if len(nextQs) > 0 else 0
         target = reward + self.discount * nextBestQ
-        print("TARGET: " + str(reward) + " " + str(nextBestQ))
+        #print("TARGET: " + str(reward) + " " + str(nextBestQ))
         self.model.update(vector_features, target)
 
 
@@ -90,42 +90,11 @@ class ModelPlayer(Baseline):
             # tuple hax
             score, chosen = max([(self.getQ(state,action), action) for action in actions])
         self.hand.remove(chosen)
-
         self.playHistory.append((state, chosen))
         #print("MODEL PLAYED:", chosen)
         return chosen
 
 
-'''
-
-Class used to encapsulate generic evaluation functions that we might want
-to test out for Q_opt.
-
-E.X 
-
-hidden = 100
-lr = 1e-3 # usually a reasonable val
-weights = nn.Sequential(
-    nn.Linear(52, hidden ),
-    nn.ReLU(),
-    nn.Linear(hidden, 1)
-)
-criterion = nn.MSELoss()
-optimizer = torch.optim.Adam(weights.parameters(), lr=learning_rate)
-
-def pred(weights, features):
-    with torch.no_grad():
-        score = weights(features)
-        return weights
-
-def upd(weights, features, target):
-    current estimate = weights(features)
-    loss = criterion(current_estimate, target)
-    optimizer.zero_grad()
-    loss.backward()
-    optimizer.step()
-    return loss
-'''
 
 class QModel:
 
@@ -133,7 +102,6 @@ class QModel:
         self.model = model
         self.predict_lambda = predict_lambda
         self.update_lambda = update_lambda
-        #self.writer = SummaryWriter()
         self.num_iters = 0
 
     
@@ -145,8 +113,7 @@ class QModel:
         self.num_iters += 1
         features = torch.tensor(features)
         loss = self.update_lambda(self.model, features, target)
-        if False: # TODO: Re enable
-            utils.TWriter.add_scalar('data/loss', loss, self.num_iters)
+        utils.TWriter.add_scalar('data/loss', loss, self.num_iters)
 
 class Flatten(nn.Module):
     def __init__(self):
@@ -164,50 +131,74 @@ class Unflatten(nn.Module):
 ### Play test around
 class ModelTest(ModelPlayer):
 
+    def __init__(self, hand, name=""):
+
+        
+        learning_rate = 1e-3 # usually a reasonable val
+        LEN_FEATURE_VECTOR =      52    +          52      +     4    +  52   +  4  +  4  + 52
+        #                    playerCards    claimedCards    playerBids   pile    tricks       
+        
+        weights = self.getNNStructure(LEN_FEATURE_VECTOR)
+        oldweights = self.getNNStructure(LEN_FEATURE_VECTOR)
+        criterion = nn.SmoothL1Loss()
+        optimizer = optim.Adam(weights.parameters(), lr=learning_rate, weight_decay=0)
+        # setup gpu computing
+        if cuda.is_available():
+            weights = weights.cuda()
+            oldweights = oldweights.cuda()
+            criterion = criterion.cuda()
+            print("cuda'd optimizer")
+        
+        #self.load(weights, optimizer) use when need to load old models
+        pred, upd = self.getLambdas(criterion, optimizer, oldweights, weights)
+        self.optimizer = optimizer
+        self.weights = weights
+        self.oldweights = oldweights
+        self.testQModel = QModel(weights, pred, upd)
+        super().__init__(1, self.testQModel, utils.genActions, game.Game.stateFeatureExtractor, 0, hand, name)
+
+
     def save(self, path="./qmodel"):
 
         state = {
             "model": self.weights.state_dict(),
             "optimizer": self.optimizer.state_dict(),
         }
-        torch.save(state, path+str(self.name))
+        torch.save(state, path)
 
     def load(self, model, optimizer, path="./qmodel"):
         checkpoint = torch.load(path)
         model.load_state_dict(checkpoint['model'])
         optimizer.load_state_dict(checkpoint['optimizer'])
     
+    def getLambdas(self, criterion, optimizer, oldweights, weights):
+        def pred(weights, features):
+            with torch.no_grad():
+                if cuda.is_available():
+                    features = features.cuda()
+                score = oldweights(features)
+            return score
 
+        def upd(weights, features, target):
+            t = torch.tensor(float(target))
+            if cuda.is_available():
+                features = features.cuda()
+                t = t.cuda()
+            
+            current_estimate = weights(features)
+            #if target < 10:
+            #    print(str(current_estimate) + " " + str(target))
+            loss = criterion(current_estimate, t)
+            #print("Loss: " + str(loss))
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
+            return loss
+        return pred, upd
 
-    def __init__(self, hand, name=""):
-
-        
-<<<<<<< HEAD
-        learning_rate = 5e-5 # usually a reasonable val
-        LEN_FEATURE_VECTOR = 57 # 52    +          52      +     14*4     +  52   +  4  +  4  + 52
-=======
-        learning_rate = 5e-2 # usually a reasonable val
-        LEN_FEATURE_VECTOR =      52    +          52      +     4    +  52   +  4  +  4  + 52
->>>>>>> 1219fb49c07ef8a0a70a75cea063589072b10985
-        #                    playerCards    claimedCards    playerBids   pile    tricks       
-        
-        
-       # Auto create deep linear NN from just changing hidden
-        '''
-        hidden = [100, 200, 100] ##Just change this
-        #######  Keep Here ############
-        modules = [nn.Linear(LEN_FEATURE_VECTOR, hidden[0])]
-        for i in range(len(hidden)-1 ):
-            modules.append(nn.Linear(hidden[i], hidden[i+1]))
-            modules.append(nn.ReLU())
-        modules.append(nn.Linear(hidden[-1], 1))
-        ######   KEEP HERE #########
-        
-        weights = nn.Sequential(*modules)
-        '''
-
-        weights = nn.Sequential(
-            nn.Linear(LEN_FEATURE_VECTOR, 40),
+    def getNNStructure(self, feature_len):
+        return nn.Sequential(
+            nn.Linear(feature_len, 40),
             Unflatten(),
             nn.ReLU(),
             nn.Conv1d(in_channels=1, out_channels=4, kernel_size=5, padding=2),
@@ -220,42 +211,3 @@ class ModelTest(ModelPlayer):
             nn.ReLU(),
             nn.Linear(100, 1)
         )
-        
-        
-
-        criterion = nn.SmoothL1Loss()
-        optimizer = optim.Adam(weights.parameters(), lr=learning_rate, weight_decay=0)
-        
-        # setup gpu computing
-        if cuda.is_available():
-            weights = weights.cuda()
-            criterion = criterion.cuda()
-            print("cuda'd optimizer")
-        #   self.load(weights, optimizer)
-
-        def pred(weights, features):
-            with torch.no_grad():
-                if cuda.is_available():
-                    features = features.cuda()
-                score = weights(features)
-            return score
-
-        def upd(weights, features, target):
-            t = torch.tensor(float(target))
-            if cuda.is_available():
-                features = features.cuda()
-                t = t.cuda()
-            
-            current_estimate = weights(features)
-            if target < 10:
-                print(str(current_estimate) + " " + str(target))
-            loss = criterion(current_estimate, t)
-            #print("Loss: " + str(loss))
-            optimizer.zero_grad()
-            loss.backward()
-            optimizer.step()
-            return loss
-        self.optimizer = optimizer
-        self.weights = weights
-        self.testQModel = QModel(weights, pred, upd)
-        super().__init__(1, self.testQModel, utils.genActions, game.Game.stateFeatureExtractor, 0.05, hand, name)
