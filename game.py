@@ -78,7 +78,7 @@ class Game:
         '''
         playerHand, playerClaimedCards, playerBids, playerBags, pile = state
         
-        '''
+        
         actions = [0] * 52
         if action:
             actions[action.index] = 1
@@ -100,8 +100,7 @@ class Game:
             pileF[card.index] = float(i + 1)
 
         tricksF = [float(len(c) // 4) for c in playerClaimedCards] # should divide evenly
-<<<<<<< HEAD
-        return playerHandF + claimedF + bidIndicators +  pileF  + tricksF + playerBags + actions
+        return playerHandF + claimedF + playerBids +  pileF  + tricksF + playerBags + actions
         '''
         cards = [float(0)]*52
         for card in playerHand:
@@ -113,6 +112,7 @@ class Game:
             for card in claimed:
                 cards[card.index] = i + 2
         return cards + [float(b) for b in playerBids] + [float(action.index if not action is None else -1)]# 52 + 4 + 1
+        '''
         
 
     @staticmethod
@@ -121,6 +121,3 @@ class Game:
 
         broke = any(p.getSuit() == Card.SPADES_SUIT for p in pile)
         return playerHand, pile, broke
-=======
-        return playerHandF + claimedF + playerBids +  pileF  + tricksF + playerBags + actions
->>>>>>> 8c1a4812c1a1bbf0a02a7c8b2b3fbb50c3fad4fc

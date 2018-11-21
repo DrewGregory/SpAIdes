@@ -125,7 +125,6 @@ class Baseline(Player):
 
     def playCard(self, state, actions, pile):
         card = None
-        
         if len(pile) == 0:
             card = actions[0]#random.choice(actions)
         else:

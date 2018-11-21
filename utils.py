@@ -2,7 +2,7 @@
 
 from tensorboardX import SummaryWriter
 
-TWriter = SummaryWriter()
+#TWriter = SummaryWriter()
 
 
 def genActions(hand, pile, brokeSpades):
