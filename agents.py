@@ -35,7 +35,7 @@ class ModelPlayer(Baseline):
 
     def declareBid(self, state):
         # confidence interval
-        ci = float(1 / self.numIters)
+        ci = float(1 / max(self.numiters, 1))
         # find min and max bounds
         lower, upper = 0, 13
         
@@ -140,8 +140,8 @@ class ModelTest(ModelPlayer):
 
         
         learning_rate = 1e-3 # usually a reasonable val
-        LEN_FEATURE_VECTOR =      52    +          52      +     4    +  52   +  4  +  4  + 52
-        #                    playerCards    claimedCards    playerBids   pile    tricks       
+        LEN_FEATURE_VECTOR =      52    +        52        +     4    +  52   +  4   +     4      + 52
+        #                    playerCards    claimedCards    playerBids   pile  tricks  playerBags   actions      
         
         weights = self.getNNStructure(LEN_FEATURE_VECTOR)
         oldweights = self.getNNStructure(LEN_FEATURE_VECTOR)
@@ -154,13 +154,14 @@ class ModelTest(ModelPlayer):
             criterion = criterion.cuda()
             print("cuda'd optimizer")
         
-        #self.load(weights, optimizer) use when need to load old models
+        self.load(oldweights, optimizer) #use when need to load old models
+        self.load(weights, optimizer) #use when need to load old models
         pred, upd = self.getLambdas(criterion, optimizer, oldweights, weights)
         self.optimizer = optimizer
         self.weights = weights
         self.oldweights = oldweights
         self.testQModel = QModel(weights, pred, upd)
-        super().__init__(1, self.testQModel, utils.genActions, game.Game.stateFeatureExtractor, 0, hand, name)
+        super().__init__(1, self.testQModel, utils.genActions, game.Game.stateFeatureExtractor, .0001, hand, name)
 
 
     def save(self, path="./qmodel"):

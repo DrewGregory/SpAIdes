@@ -9,6 +9,8 @@ torch = "==0.4.1"
 torchvision = "*"
 matplotlib = "*"
 tensorboardx = "*"
+tensorboard = "*"
+tensorflow = "*"
 
 [dev-packages]
 

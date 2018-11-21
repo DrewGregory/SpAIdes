@@ -15,7 +15,7 @@ import utils
 class Moderator:
 
     TEST = 1
-    NUM_GAMES = int(1e3)
+    NUM_GAMES = int(1e4)
     LOGGING = True
 
     
@@ -37,7 +37,7 @@ class Moderator:
         self.roundCursor = 0
         # while max((Game.END_SCORE,) + tuple([player.score for player in self.players])) == Game.END_SCORE:
         for _ in range(Moderator.NUM_GAMES):
-            random.seed(_ % Moderator.TEST)
+            #random.seed(_ % Moderator.TEST)
             self.roundCursor = 0
             self.game.deck = [Card(i) for i in range(Card.NUM_CARDS)]
             # Initialize round, deals cards and bids
@@ -81,12 +81,12 @@ class Moderator:
                     player = self.game.players[playerIndex]
                     playerState = self.game.getPlayerGameState(player, playerIndex)
                     
-                    reward = 0#( min(player.tricksWon(self.game.NUM_PLAYERS) - player.bid, 0) ) /(13 - numRotations + 1) # default reward for no tricks won
+                    reward = ( min(player.tricksWon(self.game.NUM_PLAYERS) - player.bid, 0) ) /(13 - numRotations + 1) # default reward for no tricks won
                    
                     # Give reward for winning, but penalize if it's overbidding
                     if playerIndex == winnerIndex:
                         if player.tricksWon(self.game.NUM_PLAYERS) > player.bid:
-                            reward = 0 #-0.5
+                            reward = -0.5
                         else:
                             reward = 1
                     '''
@@ -105,7 +105,7 @@ class Moderator:
                 utils.TWriter.add_scalar('data/bid', mt.bid, _)
                 logScores = {}
                 for p in self.game.players:
-                    logScores[p.name] = p.tricksWon()#p.score
+                    logScores[p.name] = p.score
                 utils.TWriter.add_scalars('data/scores'+str(_%Moderator.TEST), logScores, _)
                 
             #### END Logging ####
@@ -120,7 +120,7 @@ class Moderator:
                 if Moderator.LOGGING:
                     mt.save()
                 # Calculate scores
-                print("SCORES: \n --------")
+                print("SCORES: \n --------  " + str(_/Moderator.NUM_GAMES))
                 for player in self.game.players:
                     print(player.name + ":  " + str(player.score))
                 for score  in otherScores:
@@ -129,8 +129,4 @@ class Moderator:
                 if Moderator.LOGGING:
                     model_total.append(mt.score)
                 print("Model Score: " + str(testScore[2]), "Bid: ", testScore[1], "Tricks Won: ", testScore[0] )
-        
-
-        plt.plot(range(len(model_total)), model_total)
-        plt.show()
         print(mean(avgScoreDifferential))
