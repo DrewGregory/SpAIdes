@@ -54,21 +54,18 @@ class ModelPlayer(Baseline):
         self.bid = bestQ[1]
 
         # sample 'informed' random choice
-        # confidence interval, stand-in for self.exploreProb
-        if random.random() < float(1 / max(self.numiters, 1)):
-            print('*** sampling random: ***')
-            qVals = [float(qVal - minQ) for qVal in qVals]
-            print('qVals' + str(qVals))
-            denom = sum(qVals)
-            print('denom' + str(denom))
-            for i, qVal in enumerate(qVals):
-                qVals[i] = float(qVal / denom)
-            print('updated qVals' + str(qVals))
-            self.bid = np.random.choice(range(Card.NUM_PER_SUIT + 1), p=qVals)
-            print('kk passed' + str(self.bid))
+        # dynamic explore prob, sqrt to incr probability as numiters increases
+        if random.random() < np.sqrt(float(1 / max(self.numiters, 1))):
+            # print('*** SAMPLING RANDOM: ***')
+            # NOTE possible problem: strategy dictates least valuable strategy never chosen
+            denom = float(sum(qVals) - len(qVals) * minQ)
+            qVals = [float((qVal - minQ) / denom) for qVal in qVals]
+            # print('original bid: ' + str(self.bid))
+            # Using 1 because of default None because of cryptic dtype bug
+            self.bid = np.random.choice(range(Card.NUM_PER_SUIT + 1), 1, p = qVals).tolist()[0]
+            # print('randomly sampled bid: ' + str(self.bid))
 
         return self.bid
-    
 
     def getQ(self, state, action):
         vector_features = self.featureExtractor(state, action)
@@ -82,7 +79,6 @@ class ModelPlayer(Baseline):
         lastState, lastAction = self.playHistory[-1]
         self.personalFeedback(lastState, lastAction, reward, newState)
 
-
     def personalFeedback(self, state, action, reward, newState):
         self.numiters += 1
         vector_features = self.featureExtractor(state, action)
@@ -93,13 +89,12 @@ class ModelPlayer(Baseline):
         nextQs = [(self.getQ(newState, a) , a) for a in nextActions]
         nextBestQ = (max(nextQs))[0] if len(nextQs) > 0 else 0
         target = reward + self.discount * nextBestQ
-        print("TARGET: " + str(target) + str(reward) + " " + str(nextBestQ))
+        # print("TARGET: " + str(target) + " " + str(reward) + " " + str(nextBestQ))
         self.model.update(vector_features, target)
 
-
     def playCard(self, state, actions, pile=None):
-        # eps
-        if random.random() < self.exploreProb:
+        # naive UCB
+        if random.random() < np.sqrt(float(1 / max(self.numiters, 1))):
             chosen = random.choice(actions)
         else:
             # tuple hax
