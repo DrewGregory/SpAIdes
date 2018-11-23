@@ -1,7 +1,24 @@
 from tensorboardX import SummaryWriter
+from numpy.random import choice
 
 TWriter = SummaryWriter()
 
+def weightedChoice(dct):
+    """
+    NOTE: unused function (consider deleting)
+    @param dct
+    
+    keys of dct: range(1, 14)
+    vals: weights associated with each
+
+    @return int: weighted random choice
+    """
+    vals = range(Card.NUM_PER_SUIT + 1)
+    probs = []
+    denom = sum(dct.values())
+    for val in vals:
+        probs.append(dct[val] / denom)
+    return choice(vals, p = probs)
 
 def genActions(hand, pile, brokeSpades):
     """

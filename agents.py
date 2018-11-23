@@ -1,3 +1,4 @@
+# NN stuffs
 import numpy as np
 import torch.nn as nn
 import torch.optim as optim
@@ -5,7 +6,7 @@ import torch.cuda as cuda
 import torch
 from tensorboardX import SummaryWriter
 
-
+# game stuff
 from player import Player, Baseline
 import random
 import game
@@ -32,30 +33,40 @@ class ModelPlayer(Baseline):
         self.model = model # evaluation function class
         self.actions = actions
 
-    def declareBid(self, state):
-        # confidence interval
-        ci = float(1 / max(self.numiters, 1))
-        # find min and max bounds
-        lower, upper = 0, 13
-        
-        if random.random() < 0:
-            choice = random.choice(range(13))
-            #print("random choice: " + str(choice))
-            self.bid = choice
-            return self.bid
 
-        bestQ = (float("-inf"), 0) #0 because weird errors with None
-        for i in range(0, 14):
+    def declareBid(self, state):
+        '''
+        As number of iterations increases, probability of exploration
+        decreases inversely proportionally. Alternate bid chosen with
+        probability proportional to perceived Q-value
+        '''
+        bestQ = (float("-inf"), 0) # 0 because weird errors with None
+        qVals = []
+        minQ = float('inf')
+        for i in range(Card.NUM_PER_SUIT + 1):
             state[2][0] = i
-            #print("New state: " + str(state[2]))
             newQ = float(self.getQ(state, None))
-            #print("NEWQ : " + str(newQ))
             bestQ = max(bestQ, (newQ, i))
+            minQ = min(minQ, newQ)
+            qVals.append(newQ) # index ~ bid number
         # Don't need to revert our bid cuz it will be overwritten
-        #print("bestChoice: " + str(bestQ[1]))
         assert not bestQ[0] == None
         self.bid = bestQ[1]
-        #print("BID " + str(self.bid))
+
+        # sample 'informed' random choice
+        # confidence interval, stand-in for self.exploreProb
+        if random.random() < float(1 / max(self.numiters, 1)):
+            print('*** sampling random: ***')
+            qVals = [float(qVal - minQ) for qVal in qVals]
+            print('qVals' + str(qVals))
+            denom = sum(qVals)
+            print('denom' + str(denom))
+            for i, qVal in enumerate(qVals):
+                qVals[i] = float(qVal / denom)
+            print('updated qVals' + str(qVals))
+            self.bid = np.random.choice(range(Card.NUM_PER_SUIT + 1), p=qVals)
+            print('kk passed' + str(self.bid))
+
         return self.bid
     
 
@@ -78,11 +89,11 @@ class ModelPlayer(Baseline):
         # get best action for next state
         
         nextActions =  self.actions(*game.Game.genActionParams(newState))
-        #print(nextActions)
+        # print(nextActions)
         nextQs = [(self.getQ(newState, a) , a) for a in nextActions]
         nextBestQ = (max(nextQs))[0] if len(nextQs) > 0 else 0
         target = reward + self.discount * nextBestQ
-        #print("TARGET: " + str(reward) + " " + str(nextBestQ))
+        print("TARGET: " + str(target) + str(reward) + " " + str(nextBestQ))
         self.model.update(vector_features, target)
 
 
@@ -95,7 +106,7 @@ class ModelPlayer(Baseline):
             score, chosen = max([(self.getQ(state,action), action) for action in actions])
         self.hand.remove(chosen)
         self.playHistory.append((state, chosen))
-        #print("MODEL PLAYED:", chosen)
+        # print("MODEL PLAYED:", chosen)
         return chosen
 
 
