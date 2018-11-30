@@ -17,7 +17,7 @@ class Game:
     def __init__(self, args):
         self.deck = ([Card(i) for i in range(Card.NUM_CARDS)])
         shuffle(self.deck)
-        self.players = [Baseline([], "AI Oracle Test" + str(i + 1))
+        self.players = [Baseline([], "AI Baseline" + str(i + 1))
                         for i in range(0, Game.NUM_PLAYERS - 1)]
         if args.human:
             self.players.append(Human([], "Human"))

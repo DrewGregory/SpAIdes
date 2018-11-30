@@ -113,7 +113,6 @@ class Moderator:
             otherScores = [ ( x.tricksWon(self.game.NUM_PLAYERS), x.bid, x.calculateScore()) for x in self.game.players if "AI" in x.name]
             bestScore = mean([x[2] for x in otherScores])
             testScore = ([ (x.tricksWon(self.game.NUM_PLAYERS), x.bid, x.calculateScore()) for x in self.game.players if "Test" in x.name])[0]
-            
             avgScoreDifferential.append(testScore[2] - bestScore)
             self.roundCursor = self.roundCursor + 1 % self.game.NUM_PLAYERS
             

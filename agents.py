@@ -32,7 +32,7 @@ class ModelPlayer(Baseline):
         self.model = model # evaluation function class
         self.actions = actions
         self.bidderModel = BidderModel()
-        self.bidderModel.load(self.bidderModel.weights, self.bidderModel.optimizer)
+        #self.bidderModel.load(self.bidderModel.weights, self.bidderModel.optimizer)
         self.numBids = 1
         self.bidsPerBid = [1] * 14
 
@@ -60,7 +60,6 @@ class ModelPlayer(Baseline):
     def calculateScore(self):
         score = super().calculateScore()
         self.bidderModel.updater(self.bidderModel.weights, torch.tensor(self.biddingFeatures), score)
-        print("SCORE: ")
         return score
 
     def getQ(self, state, action):
