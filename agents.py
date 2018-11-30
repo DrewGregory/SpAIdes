@@ -53,6 +53,12 @@ class ModelPlayer(Baseline):
         self.biddingFeatures = importantFeatures
         self.numBids += 1
         self.bidsPerBid[self.bid] += 1
+        if self.numBids % 1000 == 0:
+            state = {
+                "model": self.bidderModel.weights.state_dict(),
+                "optimizer": self.bidderModel.optimizer.state_dict(),
+            }
+            torch.save(state, "./bidder")
         return self.bid
 
     def calculateScore(self):
