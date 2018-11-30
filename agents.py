@@ -5,6 +5,7 @@ import torch.optim as optim
 import torch.cuda as cuda
 import torch
 from tensorboardX import SummaryWriter
+import math
 
 # game stuff
 from player import Player, Baseline
@@ -31,6 +32,8 @@ class ModelPlayer(Baseline):
         self.model = model # evaluation function class
         self.actions = actions
         self.bidderModel = BidderModel()
+        self.numBids = 1
+        self.bidsPerBid = [1] * 14
 
     def declareBid(self, state):
         '''
@@ -44,13 +47,12 @@ class ModelPlayer(Baseline):
         for i in range(0, 14):
             importantFeatures[52] = i
             bestBid = max(bestBid, (self.bidderModel.predictor(self.bidderModel.weights, \
-                torch.tensor(importantFeatures)), i))
-            print(bestBid)
+                torch.tensor(importantFeatures)) + math.sqrt((2 * math.log(self.numBids))/(self.bidsPerBid[i])), i))
         self.bid = bestBid[1]
         importantFeatures[52] = self.bid
         self.biddingFeatures = importantFeatures
-        print("CHOSE BID: " + str(self.bid))
-
+        self.numBids += 1
+        self.bidsPerBid[self.bid] += 1
         return self.bid
 
     def calculateScore(self):
@@ -247,7 +249,7 @@ class ModelTest(ModelPlayer):
 
     def getNNStructure(self, feature_len):
         return nn.Sequential(
-            nn.Linear(feature_len, 400),
+            nn.Linear(feature_len, 40),
             Unflatten(),
             nn.ReLU(),
             nn.Conv1d(in_channels=1, out_channels=4, kernel_size=5, padding=2),
@@ -260,7 +262,7 @@ class ModelTest(ModelPlayer):
             nn.ReLU(),
             nn.Conv1d(in_channels=4, out_channels=4, kernel_size=3, padding=1),
             Flatten(),
-            nn.Linear(4*400, 100),
+            nn.Linear(4*40, 100),
             nn.ReLU(),
             nn.Linear(100, 1)
         )

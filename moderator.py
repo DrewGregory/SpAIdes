@@ -15,7 +15,7 @@ import utils
 class Moderator:
 
     TEST = 1
-    NUM_GAMES = int(1e4)
+    NUM_GAMES = int(1e8)
     LOGGING = True
 
     

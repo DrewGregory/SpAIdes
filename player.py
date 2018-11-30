@@ -68,7 +68,7 @@ class Player:
             sub += self.bid*10
         return sub
 
-    def calculateScore(self, reset=True, scoreFunction=justTricksScore):
+    def calculateScore(self, reset=True, scoreFunction=regressionScore):
         tricks = len(self.claimed) // 4
         subScore = scoreFunction(self, tricks)
         # Reset round state
