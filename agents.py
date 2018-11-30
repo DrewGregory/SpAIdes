@@ -1,3 +1,4 @@
+# NN stuffs
 import numpy as np
 import torch.nn as nn
 import torch.optim as optim
@@ -5,7 +6,7 @@ import torch.cuda as cuda
 import torch
 from tensorboardX import SummaryWriter
 
-
+# game stuff
 from player import Player, Baseline
 import random
 import game
@@ -32,32 +33,39 @@ class ModelPlayer(Baseline):
         self.model = model # evaluation function class
         self.actions = actions
 
-    def declareBid(self, state):
-        # confidence interval
-        ci = float(1 / max(self.numiters, 1))
-        # find min and max bounds
-        lower, upper = 0, 13
-        
-        if random.random() < 0:
-            choice = random.choice(range(13))
-            #print("random choice: " + str(choice))
-            self.bid = choice
-            return self.bid
 
-        bestQ = (float("-inf"), 0) #0 because weird errors with None
-        for i in range(0, 14):
+    def declareBid(self, state):
+        '''
+        As number of iterations increases, probability of exploration
+        decreases inversely proportionally. Alternate bid chosen with
+        probability proportional to perceived Q-value
+        '''
+        bestQ = (float("-inf"), 0) # 0 because weird errors with None
+        qVals = []
+        minQ = float('inf')
+        for i in range(Card.NUM_PER_SUIT + 1):
             state[2][0] = i
-            #print("New state: " + str(state[2]))
             newQ = float(self.getQ(state, None))
-            #print("NEWQ : " + str(newQ))
             bestQ = max(bestQ, (newQ, i))
+            minQ = min(minQ, newQ)
+            qVals.append(newQ) # index ~ bid number
         # Don't need to revert our bid cuz it will be overwritten
-        #print("bestChoice: " + str(bestQ[1]))
         assert not bestQ[0] == None
         self.bid = bestQ[1]
-        #print("BID " + str(self.bid))
+
+        # sample 'informed' random choice
+        # dynamic explore prob, sqrt to incr probability as numiters increases
+        if random.random() < np.sqrt(float(1 / max(self.numiters, 1))):
+            # print('*** SAMPLING RANDOM: ***')
+            # NOTE possible problem: strategy dictates least valuable strategy never chosen
+            denom = float(sum(qVals) - len(qVals) * minQ)
+            qVals = [float((qVal - minQ) / denom) for qVal in qVals]
+            # print('original bid: ' + str(self.bid))
+            # Using 1 because of default None because of cryptic dtype bug
+            self.bid = np.random.choice(range(Card.NUM_PER_SUIT + 1), 1, p = qVals).tolist()[0]
+            # print('randomly sampled bid: ' + str(self.bid))
+
         return self.bid
-    
 
     def getQ(self, state, action):
         vector_features = self.featureExtractor(state, action)
@@ -71,31 +79,29 @@ class ModelPlayer(Baseline):
         lastState, lastAction = self.playHistory[-1]
         self.personalFeedback(lastState, lastAction, reward, newState)
 
-
     def personalFeedback(self, state, action, reward, newState):
         self.numiters += 1
         vector_features = self.featureExtractor(state, action)
         # get best action for next state
         
         nextActions =  self.actions(*game.Game.genActionParams(newState))
-        #print(nextActions)
+        # print(nextActions)
         nextQs = [(self.getQ(newState, a) , a) for a in nextActions]
         nextBestQ = (max(nextQs))[0] if len(nextQs) > 0 else 0
         target = reward + self.discount * nextBestQ
-        #print("TARGET: " + str(reward) + " " + str(nextBestQ))
+        # print("TARGET: " + str(target) + " " + str(reward) + " " + str(nextBestQ))
         self.model.update(vector_features, target)
 
-
     def playCard(self, state, actions, pile=None):
-        # eps
-        if random.random() < self.exploreProb:
+        # naive UCB
+        if random.random() < np.sqrt(float(1 / max(self.numiters, 1))):
             chosen = random.choice(actions)
         else:
             # tuple hax
             score, chosen = max([(self.getQ(state,action), action) for action in actions])
         self.hand.remove(chosen)
         self.playHistory.append((state, chosen))
-        #print("MODEL PLAYED:", chosen)
+        # print("MODEL PLAYED:", chosen)
         return chosen
 
 
