@@ -32,6 +32,7 @@ class ModelPlayer(Baseline):
         self.model = model # evaluation function class
         self.actions = actions
         self.bidderModel = BidderModel()
+        self.bidderModel.load(self.bidderModel.weights, self.bidderModel.optimizer)
         self.numBids = 1
         self.bidsPerBid = [1] * 14
 
@@ -42,7 +43,6 @@ class ModelPlayer(Baseline):
         features = self.featureExtractor(state, None)
         # Trim down features to player hand and player bids.
         importantFeatures = features[:52] + features[104:108]
-        print(importantFeatures)
         bestBid = (0,0)
         for i in range(0, 14):
             importantFeatures[52] = i
@@ -54,16 +54,13 @@ class ModelPlayer(Baseline):
         self.numBids += 1
         self.bidsPerBid[self.bid] += 1
         if self.numBids % 1000 == 0:
-            state = {
-                "model": self.bidderModel.weights.state_dict(),
-                "optimizer": self.bidderModel.optimizer.state_dict(),
-            }
-            torch.save(state, "./bidder")
+            self.bidderModel.save()
         return self.bid
 
     def calculateScore(self):
         score = super().calculateScore()
         self.bidderModel.updater(self.bidderModel.weights, torch.tensor(self.biddingFeatures), score)
+        print("SCORE: ")
         return score
 
     def getQ(self, state, action):
@@ -170,6 +167,22 @@ class BidderModel:
         self.predictor, self.updater = getLambdas(self.criterion, self.optimizer, self.weights, self.weights)
         self.model = QModel(self.weights, self.predictor, self.updater, name="BidderModel")
 
+    def save(self, path="./BidderModel"):
+        state = {
+            "model": self.weights.state_dict(),
+            "optimizer": self.optimizer.state_dict(),
+        }
+        torch.save(state, path)
+
+    def load(self, model, optimizer, path="./BidderModel"):
+        deviceName = 'cpu'
+        if cuda.is_available():
+            deviceName = 'cuda'
+        device = torch.device(deviceName)
+        checkpoint = torch.load(path, map_location=device)
+        model.load_state_dict(checkpoint['model'])
+        optimizer.load_state_dict(checkpoint['optimizer'])
+    
     def getNNStructure(self):
         BIDDING_FEATURE_LENGTH = 56 # Player Hand + Bids
         return nn.Sequential(
