@@ -105,6 +105,5 @@ class Game:
     @staticmethod
     def genActionParams(state):
         playerHand, playerClaimedCards, playerBids, playerBags, pile = state
-
         broke = any(p.getSuit() == Card.SPADES_SUIT for p in pile)
         return playerHand, pile, broke
