@@ -182,6 +182,11 @@ class BidderModel:
 ### Play test around
 class ModelTest(ModelPlayer):
 
+    QMODEL_OLD = None
+    QMODEL_TRAIN = None
+    QMODEL_CRITERION = None
+
+
     def __init__(self, hand, name=""):
 
         
@@ -193,15 +198,27 @@ class ModelTest(ModelPlayer):
         oldweights = self.getNNStructure(LEN_FEATURE_VECTOR)
         criterion = nn.SmoothL1Loss()
         optimizer = optim.Adam(weights.parameters(), lr=learning_rate, weight_decay=0)
-        # setup gpu computing
-        if cuda.is_available():
-            weights = weights.cuda()
-            oldweights = oldweights.cuda()
-            criterion = criterion.cuda()
-            print("cuda'd optimizer")
-        
-        self.load(oldweights, optimizer) #use when need to load old models
-        self.load(weights, optimizer) #use when need to load old models
+
+        if not (ModelTest.QMODEL_OLD == None and ModelTest.QMODEL_TRAIN == None):
+            weights = ModelTest.QMODEL_TRAIN
+            oldweights = ModelTest.QMODEL_TEST
+            criterion = ModelTest.QMODEL_CRITERION
+        else:
+            # setup gpu computing
+            if cuda.is_available():
+                weights = weights.cuda()
+                oldweights = oldweights.cuda()
+                criterion = criterion.cuda()
+                optimizer = optim.Adam(weights.parameters(), lr=learning_rate, weight_decay=0).cuda()
+                print("cuda'd optimizer")
+            
+            self.load(oldweights, optimizer) #use when need to load old models
+            self.load(weights, optimizer) #use when need to load old models
+            ModelTest.QMODEL_TRAIN = weights
+            ModelTest.QMODEL_TEST = oldweights
+            ModelTest.QMODEL_CRITERION = criterion
+
+
         pred, upd = getLambdas(criterion, optimizer, oldweights, weights)
         self.optimizer = optimizer
         self.weights = weights
@@ -230,7 +247,7 @@ class ModelTest(ModelPlayer):
 
     def getNNStructure(self, feature_len):
         return nn.Sequential(
-            nn.Linear(feature_len, 40),
+            nn.Linear(feature_len, 400),
             Unflatten(),
             nn.ReLU(),
             nn.Conv1d(in_channels=1, out_channels=4, kernel_size=5, padding=2),
@@ -238,8 +255,12 @@ class ModelTest(ModelPlayer):
             nn.Conv1d(in_channels=4, out_channels=4, kernel_size=5, padding=2),
             nn.ReLU(),
             nn.Conv1d(in_channels=4, out_channels=4, kernel_size=3, padding=1),
+            nn.ReLU(),
+            nn.Conv1d(in_channels=4, out_channels=4, kernel_size=3, padding=1),
+            nn.ReLU(),
+            nn.Conv1d(in_channels=4, out_channels=4, kernel_size=3, padding=1),
             Flatten(),
-            nn.Linear(4*40, 100),
+            nn.Linear(4*400, 100),
             nn.ReLU(),
             nn.Linear(100, 1)
         )

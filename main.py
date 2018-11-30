@@ -12,5 +12,7 @@ def parseArgs():
 
 
 if __name__ == "__main__":
-    m = Moderator(parseArgs())
-    m.playGame()
+    for i in range(10**3):
+        print("\n\n\n\nITERATION ", str(i)+"/"+str(10**3) , " STARTING \n\n\n")
+        m = Moderator(parseArgs())
+        m.playGame()

@@ -17,7 +17,7 @@ class Game:
     def __init__(self, args):
         self.deck = ([Card(i) for i in range(Card.NUM_CARDS)])
         shuffle(self.deck)
-        self.players = [Baseline([], "Oracle AI" + str(i + 1))
+        self.players = [Baseline([], "AI Oracle Test" + str(i + 1))
                         for i in range(0, Game.NUM_PLAYERS - 1)]
         if args.human:
             self.players.append(Human([], "Human"))
@@ -85,6 +85,8 @@ class Game:
             actions[action.index] = float(1)
         
         playerHandF = [float(0)] * Card.NUM_CARDS
+
+
         for card in playerHand:
             playerHandF[card.index] = float(1)
 
@@ -100,6 +102,7 @@ class Game:
 
         tricksF = [float(len(c) // 4) for c in playerClaimedCards] # should divide evenly
 
+        playerBids = [0, 0, 0, 0,] # for training the Trick Winner
         return playerHandF + claimedF + playerBids +  pileF + tricksF + playerBags + actions
 
     @staticmethod
