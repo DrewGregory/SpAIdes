@@ -81,7 +81,7 @@ class Moderator:
                     player = self.game.players[playerIndex]
                     playerState = self.game.getPlayerGameState(player, playerIndex)
                     
-                    reward = ( min(player.tricksWon(self.game.NUM_PLAYERS) - player.bid, 0) ) /(13 - numRotations + 1) # default reward for no tricks won
+                    reward = 0#( min(player.tricksWon(self.game.NUM_PLAYERS) - player.bid, 0) ) /(13 - numRotations + 1) # default reward for no tricks won
                    
                     # Give reward for winning, but penalize if it's overbidding
                     if playerIndex == winnerIndex:
@@ -89,6 +89,7 @@ class Moderator:
                             reward = -0.5
                         else:
                             reward = 1
+                        reward = 1
                     '''
                     if numRotations ==13:
                         reward = player.calculateScore(reset=False, scoreFunction=lambda s,t:player.simpleScore(t))
