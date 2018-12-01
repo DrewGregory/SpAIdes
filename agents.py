@@ -59,7 +59,11 @@ class ModelPlayer(Baseline):
 
     def calculateScore(self):
         score = super().calculateScore()
-        self.bidderModel.updater(self.bidderModel.weights, torch.tensor(self.biddingFeatures), score)
+        
+        loss = self.bidderModel.updater(self.bidderModel.weights, torch.tensor(self.biddingFeatures), score)
+        print("PREDICTOR: " + str(self.bidderModel.predictor(self.bidderModel.weights, \
+                torch.tensor(self.biddingFeatures))) + " SCORE: " + str(score) + " LOSS:" + str(loss))
+        utils.TWriter.add_scalar('data/loss' + self.name, loss, self.numBids)
         return score
 
     def getQ(self, state, action):
@@ -119,7 +123,7 @@ class QModel:
         self.num_iters += 1
         features = torch.tensor(features)
         loss = self.update_lambda(self.model, features, target)
-        utils.TWriter.add_scalar('data/loss' + self.name, loss, self.num_iters)
+        return loss
 
 class Flatten(nn.Module):
     def __init__(self):

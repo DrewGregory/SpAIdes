@@ -103,6 +103,7 @@ class Moderator:
             ### Logging ####
             if Moderator.LOGGING:
                 mt = [ p for p in self.game.players if p.name=="Model Test"][0]
+                print("MT BID: " + str(mt.bid))
                 utils.TWriter.add_scalar('data/bid', mt.bid, _)
                 logScores = {}
                 for p in self.game.players:
