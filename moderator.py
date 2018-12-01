@@ -85,14 +85,8 @@ class Moderator:
                    
                     # Give reward for winning, but penalize if it's overbidding
                     if playerIndex == winnerIndex:
-                        if player.tricksWon(self.game.NUM_PLAYERS) > player.bid:
-                            reward = -0.5
-                        else:
-                            reward = 1
                         reward = 1
                     '''
-                    if numRotations ==13:
-                        reward = player.calculateScore(reset=False, scoreFunction=lambda s,t:player.simpleScore(t))
                     '''
                     player.incorporateFeedback(playerState, reward)
                     
@@ -103,7 +97,7 @@ class Moderator:
             ### Logging ####
             if Moderator.LOGGING:
                 mt = [ p for p in self.game.players if p.name=="Model Test"][0]
-                print("MT BID: " + str(mt.bid))
+                #print("MT BID: " + str(mt.bid))
                 utils.TWriter.add_scalar('data/bid', mt.bid, _)
                 logScores = {}
                 for p in self.game.players:

@@ -46,8 +46,8 @@ class ModelPlayer(Baseline):
         bestBid = (float("-inf"),0)
         for i in range(0, 14):
             importantFeatures[52] = i
-            print(self.bidderModel.predictor(self.bidderModel.weights, \
-                torch.tensor(importantFeatures)) + + math.sqrt((2 * math.log(self.numBids))/(self.bidsPerBid[i])))
+            #print(self.bidderModel.predictor(self.bidderModel.weights, \
+            #    torch.tensor(importantFeatures)) + + math.sqrt((2 * math.log(self.numBids))/(self.bidsPerBid[i])))
             bestBid = max(bestBid, (self.bidderModel.predictor(self.bidderModel.weights, \
                 torch.tensor(importantFeatures)) + math.sqrt((2 * math.log(self.numBids))/(self.bidsPerBid[i])), i))
         self.bid = bestBid[1]
@@ -60,18 +60,18 @@ class ModelPlayer(Baseline):
         return self.bid
 
     def calculateScore(self):
+        #simpleScore = super().calculateScore(reset=False, scoreFunction=super().simpleScore)
         score = super().calculateScore()
-        
         loss = self.bidderModel.updater(self.bidderModel.weights, torch.tensor(self.biddingFeatures), score)
-        print("PREDICTOR: " + str(self.bidderModel.predictor(self.bidderModel.weights, \
-                torch.tensor(self.biddingFeatures))) + " SCORE: " + str(score) + " LOSS:" + str(loss))
+        #print("PREDICTOR: " + str(self.bidderModel.predictor(self.bidderModel.weights, \
+        #        torch.tensor(self.biddingFeatures))) + " SCORE: " + str(score) + " LOSS:" + str(loss))
         utils.TWriter.add_scalar('data/bidLoss' + self.name, loss, self.numBids)
         return score
 
     def getQ(self, state, action):
         vector_features = self.featureExtractor(state, action)
         output = self.model.predict(vector_features)
-        return output
+        return output  
 
     def getStepSize(self):
         return 1.0 / self.numiters
@@ -91,7 +91,8 @@ class ModelPlayer(Baseline):
         nextBestQ = (max(nextQs))[0] if len(nextQs) > 0 else 0
         target = reward + self.discount * nextBestQ
         # print("TARGET: " + str(target) + " " + str(reward) + " " + str(nextBestQ))
-        self.model.update(vector_features, target)
+        #loss = self.model.update(vector_features, target)
+        #utils.TWriter.add_scalar('data/loss'+self.name, loss, self.numiters)
 
     def playCard(self, state, actions, pile=None):
         # naive UCB
@@ -165,12 +166,38 @@ def getLambdas(criterion, optimizer, oldweights, weights):
 
 class BidderModel:
 
+    BIDDER_WEIGHTS = None
+    BIDDER_CRITERION = None
+    
     def __init__(self):
-        self.weights = self.getNNStructure()
-        self.criterion = nn.SmoothL1Loss()
-        self.optimizer = optim.Adam(self.weights.parameters(), lr=1e-3, weight_decay=0)
-        self.predictor, self.updater = getLambdas(self.criterion, self.optimizer, self.weights, self.weights)
-        self.model = QModel(self.weights, self.predictor, self.updater, name="BidderModel")
+        weights = self.getNNStructure()
+        criterion = nn.SmoothL1Loss()
+        optimizer = optim.Adam(weights.parameters(), lr=1e-3, weight_decay=0)
+        
+        
+        if not BidderModel.BIDDER_WEIGHTS == None:
+            weights = BidderModel.BIDDER_WEIGHTS
+            criterion = BidderModel.BIDDER_CRITERION
+        else:
+            # setup gpu computing
+            if cuda.is_available():
+                weights = weights.cuda()
+                criterion = criterion.cuda()
+                optimizer = optim.Adam(weights.parameters(), lr=1e-3, weight_decay=0)
+                print("cuda'd bidder")
+            self.load(weights, optimizer) #use when need to load old models
+            BidderModel.BIDDER_WEIGHTS = weights
+            BidderModel.BIDDER_CRITERION = criterion
+    
+        self.weights = weights
+        self.criterion = criterion
+        self.optimizer = optimizer
+        self.predictor, self.updater = getLambdas(BidderModel.BIDDER_CRITERION, self.optimizer,
+                                                  BidderModel.BIDDER_WEIGHTS, BidderModel.BIDDER_WEIGHTS)
+        self.model = QModel(BidderModel.BIDDER_WEIGHTS, self.predictor, self.updater, name="BidderModel")
+        #self.predictor, self.updater = getLambdas(self.criterion, self.optimizer, self.weights, self.weights)
+        #self.model = QModel(self.weights, self.predictor, self.updater, name="BidderModel")
+
 
     def save(self, path="./BidderModel"):
         state = {
@@ -184,7 +211,7 @@ class BidderModel:
         if cuda.is_available():
             deviceName = 'cuda'
         device = torch.device(deviceName)
-        checkpoint = torch.load(path, map_location=device)
+        checkpoint = torch.load(path)
         model.load_state_dict(checkpoint['model'])
         optimizer.load_state_dict(checkpoint['optimizer'])
     
@@ -230,14 +257,18 @@ class ModelTest(ModelPlayer):
             oldweights = ModelTest.QMODEL_TEST
             criterion = ModelTest.QMODEL_CRITERION
         else:
+
+
+            
+
             # setup gpu computing
             if cuda.is_available():
                 weights = weights.cuda()
                 oldweights = oldweights.cuda()
                 criterion = criterion.cuda()
-                optimizer = optim.Adam(weights.parameters(), lr=learning_rate, weight_decay=0).cuda()
+                optimizer = optim.Adam(weights.parameters(), lr=learning_rate, weight_decay=0)
                 print("cuda'd optimizer")
-            
+
             self.load(oldweights, optimizer) #use when need to load old models
             self.load(weights, optimizer) #use when need to load old models
             ModelTest.QMODEL_TRAIN = weights
@@ -262,11 +293,11 @@ class ModelTest(ModelPlayer):
         torch.save(state, path)
 
     def load(self, model, optimizer, path="./qmodel"):
-        deviceName = 'cpu'
-        if cuda.is_available():
-            deviceName = 'cuda'
-        device = torch.device(deviceName)
-        checkpoint = torch.load(path, map_location=device)
+        #deviceName = 'cpu'
+        #if cuda.is_available():
+        #    deviceName = 'cuda'
+        #device = torch.device(deviceName)
+        checkpoint = torch.load(path)
         model.load_state_dict(checkpoint['model'])
         optimizer.load_state_dict(checkpoint['optimizer'])
     
