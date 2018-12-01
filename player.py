@@ -68,6 +68,9 @@ class Player:
             sub += self.bid*10
         return sub
 
+    def simplerScore(self, tricks):
+        return (tricks -abs(tricks-self.bid))*10 
+
     def calculateScore(self, reset=True, scoreFunction=simpleScore):
         tricks = len(self.claimed) // 4
         subScore = scoreFunction(self, tricks)

@@ -43,9 +43,11 @@ class ModelPlayer(Baseline):
         features = self.featureExtractor(state, None)
         # Trim down features to player hand and player bids.
         importantFeatures = features[:52] + features[104:108]
-        bestBid = (0,0)
+        bestBid = (float("-inf"),0)
         for i in range(0, 14):
             importantFeatures[52] = i
+            print(self.bidderModel.predictor(self.bidderModel.weights, \
+                torch.tensor(importantFeatures)) + + math.sqrt((2 * math.log(self.numBids))/(self.bidsPerBid[i])))
             bestBid = max(bestBid, (self.bidderModel.predictor(self.bidderModel.weights, \
                 torch.tensor(importantFeatures)) + math.sqrt((2 * math.log(self.numBids))/(self.bidsPerBid[i])), i))
         self.bid = bestBid[1]
@@ -63,7 +65,7 @@ class ModelPlayer(Baseline):
         loss = self.bidderModel.updater(self.bidderModel.weights, torch.tensor(self.biddingFeatures), score)
         print("PREDICTOR: " + str(self.bidderModel.predictor(self.bidderModel.weights, \
                 torch.tensor(self.biddingFeatures))) + " SCORE: " + str(score) + " LOSS:" + str(loss))
-        utils.TWriter.add_scalar('data/loss' + self.name, loss, self.numBids)
+        utils.TWriter.add_scalar('data/bidLoss' + self.name, loss, self.numBids)
         return score
 
     def getQ(self, state, action):
