@@ -4,8 +4,11 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.cuda as cuda
 import torch
+from torch.autograd.variable import Variable
 from tensorboardX import SummaryWriter
 import math
+# TO VISUALIZE: from torchviz import make_dot, make_dot_from_trace
+
 
 # game stuff
 from player import Player, Baseline
@@ -32,7 +35,7 @@ class ModelPlayer(Baseline):
         self.model = model # evaluation function class
         self.actions = actions
         self.bidderModel = BidderModel()
-        #self.bidderModel.load(self.bidderModel.weights, self.bidderModel.optimizer)
+        self.bidderModel.load(self.bidderModel.weights, self.bidderModel.optimizer)
         self.numBids = 1
         self.bidsPerBid = [1] * 14
 
@@ -46,8 +49,6 @@ class ModelPlayer(Baseline):
         bestBid = (float("-inf"),0)
         for i in range(0, 14):
             importantFeatures[52] = i
-            print(self.bidderModel.predictor(self.bidderModel.weights, \
-                torch.tensor(importantFeatures)) + + math.sqrt((2 * math.log(self.numBids))/(self.bidsPerBid[i])))
             bestBid = max(bestBid, (self.bidderModel.predictor(self.bidderModel.weights, \
                 torch.tensor(importantFeatures)) + math.sqrt((2 * math.log(self.numBids))/(self.bidsPerBid[i])), i))
         self.bid = bestBid[1]
@@ -63,8 +64,6 @@ class ModelPlayer(Baseline):
         score = super().calculateScore()
         
         loss = self.bidderModel.updater(self.bidderModel.weights, torch.tensor(self.biddingFeatures), score)
-        print("PREDICTOR: " + str(self.bidderModel.predictor(self.bidderModel.weights, \
-                torch.tensor(self.biddingFeatures))) + " SCORE: " + str(score) + " LOSS:" + str(loss))
         utils.TWriter.add_scalar('data/bidLoss' + self.name, loss, self.numBids)
         return score
 
@@ -119,6 +118,10 @@ class QModel:
     
     def predict(self, features):
         features = torch.tensor(features)
+        # var = Variable(features)
+        # y = self.model(var)
+        # make_dot(y.mean(), params=dict(self.model.named_parameters())).render('./round-table.gv', view=True , engine='sfdp')
+        # exit(0)
         return self.predict_lambda(self.model, features)
     
     def update(self, features, target):

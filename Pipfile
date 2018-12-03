@@ -11,6 +11,8 @@ matplotlib = "*"
 tensorboardx = "*"
 tensorboard = "*"
 tensorflow = "*"
+hickle = "*"
+pytorchviz = {git = "https://github.com/szagoruyko/pytorchviz"}
 
 [dev-packages]
 

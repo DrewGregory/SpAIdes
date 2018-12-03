@@ -17,11 +17,11 @@ class Game:
     def __init__(self, args):
         self.deck = ([Card(i) for i in range(Card.NUM_CARDS)])
         shuffle(self.deck)
-        self.players = [Baseline([], "AI Baseline" + str(i + 1))
+        self.players = [ModelTest([], "AI" + str(i + 1))
                         for i in range(0, Game.NUM_PLAYERS - 1)]
         if args.human:
-            self.players.append(Human([], "Human"))
-            self.players[-2] = ModelTest([], "Model Test")
+            self.players.append(Human([], input("Name? ")))
+            #self.players[-2] = ModelTest([], "Model Test")
         elif args.oracle:
             self.players.append(Oracle([], "Oracle"))
         elif args.idiot:

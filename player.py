@@ -68,9 +68,6 @@ class Player:
             sub += self.bid*10
         return sub
 
-    def simplerScore(self, tricks):
-        return (tricks -abs(tricks-self.bid))*10 
-
     def calculateScore(self, reset=True, scoreFunction=simpleScore):
         tricks = len(self.claimed) // 4
         subScore = scoreFunction(self, tricks)
@@ -104,14 +101,12 @@ class Human(Player):
         print("Possible Cards: " + str(actions))
         print("Claimed cards: " + str(self.claimed))
         print("Tricks so far: %d \t Bid: %d" % (len(self.claimed)/4, self.bid))
-        print(state)
         overly_large_index = 1000
         chosenIndex = overly_large_index
         while chosenIndex >= len(actions):
             chosenIndex = int(input("Which card do you want to play (Index)? ")
                               or overly_large_index)
         self.removeCard(actions[chosenIndex])
-        print(" ")
         return actions[chosenIndex]
 
 

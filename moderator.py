@@ -17,6 +17,7 @@ class Moderator:
     TEST = 1
     NUM_GAMES = int(1e8)
     LOGGING = True
+    VERBOSE_PLAY = True
 
     
     def __init__(self, args):
@@ -67,12 +68,18 @@ class Moderator:
                     player = self.game.players[(self.playerCursor + i) % self.game.NUM_PLAYERS]
                     actions = genActions(player.hand, self.game.pile, brokeSpades)
                     playerState = self.game.getPlayerGameState(player, (self.playerCursor + i) % self.game.NUM_PLAYERS)
-                    self.game.pile.append(player.playCard(playerState, actions ,self.game.pile))
+                    card = player.playCard(playerState, actions ,self.game.pile)
+                    if Moderator.VERBOSE_PLAY:
+                        print(player.name + " played " + str(card))
+                    self.game.pile.append(card)
                 # winnerIndex now represents the *index of the winning player*
                 winnerIndex = (self.playerCursor + determineWinCardIndex(self.game.pile)) % self.game.NUM_PLAYERS
                 if any (card.index < Card.NUM_PER_SUIT for card in self.game.pile):
                     brokeSpades = True
                 # update winning player's claimed cards
+                if Moderator.VERBOSE_PLAY:
+                    print(self.game.players[winnerIndex].name + " won the trick")
+                    print()
                 self.game.players[winnerIndex].claimed.update(self.game.pile)
 
                 # incorporate feedback based on trick winning
@@ -101,9 +108,8 @@ class Moderator:
 
 
             ### Logging ####
-            if Moderator.LOGGING:
+            if Moderator.LOGGING and not Moderator.VERBOSE_PLAY:
                 mt = [ p for p in self.game.players if p.name=="Model Test"][0]
-                print("MT BID: " + str(mt.bid))
                 utils.TWriter.add_scalar('data/bid', mt.bid, _)
                 logScores = {}
                 for p in self.game.players:
@@ -111,12 +117,16 @@ class Moderator:
                 utils.TWriter.add_scalars('data/scores'+str(_%Moderator.TEST), logScores, _)
                 
             #### END Logging ####
+            for player in self.game.players:
+                print(player.name + ": " + str(player.calculateScore()))
+            """
             otherScores = [ ( x.tricksWon(self.game.NUM_PLAYERS), x.bid, x.calculateScore()) for x in self.game.players if "AI" in x.name]
             bestScore = mean([x[2] for x in otherScores])
             testScore = ([ (x.tricksWon(self.game.NUM_PLAYERS), x.bid, x.calculateScore()) for x in self.game.players if "Test" in x.name])[0]
             avgScoreDifferential.append(testScore[2] - bestScore)
+            """
             self.roundCursor = self.roundCursor + 1 % self.game.NUM_PLAYERS
-            
+            """
             if _ % 100 == 0:
                 if Moderator.LOGGING:
                     mt.save()
@@ -130,4 +140,5 @@ class Moderator:
                 if Moderator.LOGGING:
                     model_total.append(mt.score)
                 print("Model Score: " + str(testScore[2]), "Bid: ", testScore[1], "Tricks Won: ", testScore[0] )
+            """
         print(mean(avgScoreDifferential))

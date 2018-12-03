@@ -1,0 +1,137 @@
+digraph {
+	graph [size="17.55,17.55"]
+	node [align=left fontsize=12 height=0.2 ranksep=0.1 shape=box style=filled]
+	4790717240 [label=MeanBackward1 fillcolor=darkolivegreen1]
+	4790716456 -> 4790717240
+	4790716456 [label=ThAddBackward]
+	4790715728 -> 4790716456
+	4790715728 [label=SqueezeBackward3]
+	4790715616 -> 4790715728
+	4790715616 [label=MmBackward]
+	4790716288 -> 4790715616
+	4790716288 [label=UnsqueezeBackward0]
+	4790715504 -> 4790716288
+	4790715504 [label=ThresholdBackward0]
+	4790715952 -> 4790715504
+	4790715952 [label=ThAddBackward]
+	4790715560 -> 4790715952
+	4790715560 [label=SqueezeBackward3]
+	4790716064 -> 4790715560
+	4790716064 [label=MmBackward]
+	4790716344 -> 4790716064
+	4790716344 [label=UnsqueezeBackward0]
+	4790717576 -> 4790716344
+	4790717576 [label=ViewBackward]
+	4790716512 -> 4790717576
+	4790716512 [label=SqueezeBackward1]
+	4790716120 -> 4790716512
+	4790716120 [label=ThnnConv2DBackward]
+	4790716960 -> 4790716120
+	4790716960 [label=UnsqueezeBackward0]
+	4790716008 -> 4790716960
+	4790716008 [label=ThresholdBackward0]
+	4790717688 -> 4790716008
+	4790717688 [label=SqueezeBackward1]
+	4790717072 -> 4790717688
+	4790717072 [label=ThnnConv2DBackward]
+	4790716400 -> 4790717072
+	4790716400 [label=UnsqueezeBackward0]
+	4793099712 -> 4790716400
+	4793099712 [label=ThresholdBackward0]
+	4793051064 -> 4793099712
+	4793051064 [label=SqueezeBackward1]
+	4793050728 -> 4793051064
+	4793050728 [label=ThnnConv2DBackward]
+	4793050392 -> 4793050728
+	4793050392 [label=UnsqueezeBackward0]
+	4793051736 -> 4793050392
+	4793051736 [label=ThresholdBackward0]
+	4793051624 -> 4793051736
+	4793051624 [label=SqueezeBackward1]
+	4793051456 -> 4793051624
+	4793051456 [label=ThnnConv2DBackward]
+	4793173328 -> 4793051456
+	4793173328 [label=UnsqueezeBackward0]
+	4793173552 -> 4793173328
+	4793173552 [label=ThresholdBackward0]
+	4793173664 -> 4793173552
+	4793173664 [label=SqueezeBackward1]
+	4793173776 -> 4793173664
+	4793173776 [label=ThnnConv2DBackward]
+	4793173888 -> 4793173776
+	4793173888 [label=UnsqueezeBackward0]
+	4793174112 -> 4793173888
+	4793174112 [label=ThresholdBackward0]
+	4793174224 -> 4793174112
+	4793174224 [label=ViewBackward]
+	4793174336 -> 4793174224
+	4793174336 [label=ThAddBackward]
+	4793174448 -> 4793174336
+	4793174448 [label=SqueezeBackward3]
+	4793174616 -> 4793174448
+	4793174616 [label=MmBackward]
+	4793174728 -> 4793174616
+	4793174728 [label=TBackward]
+	4793174840 -> 4793174728
+	4793174840 [label="0.weight
+ (40, 220)" fillcolor=lightblue]
+	4793174504 -> 4793174336
+	4793174504 [label="0.bias
+ (40)" fillcolor=lightblue]
+	4793173944 -> 4793173776
+	4793173944 [label=UnsqueezeBackward0]
+	4793174168 -> 4793173944
+	4793174168 [label="3.weight
+ (4, 1, 5)" fillcolor=lightblue]
+	4793174000 -> 4793173776
+	4793174000 [label="3.bias
+ (4)" fillcolor=lightblue]
+	4793173384 -> 4793051456
+	4793173384 [label=UnsqueezeBackward0]
+	4793173608 -> 4793173384
+	4793173608 [label="5.weight
+ (4, 4, 5)" fillcolor=lightblue]
+	4793173440 -> 4793051456
+	4793173440 [label="5.bias
+ (4)" fillcolor=lightblue]
+	4793050280 -> 4793050728
+	4793050280 [label=UnsqueezeBackward0]
+	4793051680 -> 4793050280
+	4793051680 [label="7.weight
+ (4, 4, 3)" fillcolor=lightblue]
+	4793050224 -> 4793050728
+	4793050224 [label="7.bias
+ (4)" fillcolor=lightblue]
+	4790717296 -> 4790717072
+	4790717296 [label=UnsqueezeBackward0]
+	4793051232 -> 4790717296
+	4793051232 [label="9.weight
+ (4, 4, 3)" fillcolor=lightblue]
+	4790717632 -> 4790717072
+	4790717632 [label="9.bias
+ (4)" fillcolor=lightblue]
+	4790716568 -> 4790716120
+	4790716568 [label=UnsqueezeBackward0]
+	4790717800 -> 4790716568
+	4790717800 [label="11.weight
+ (4, 4, 3)" fillcolor=lightblue]
+	4790717352 -> 4790716120
+	4790717352 [label="11.bias
+ (4)" fillcolor=lightblue]
+	4790716736 -> 4790716064
+	4790716736 [label=TBackward]
+	4790717464 -> 4790716736
+	4790717464 [label="13.weight
+ (100, 160)" fillcolor=lightblue]
+	4790716680 -> 4790715952
+	4790716680 [label="13.bias
+ (100)" fillcolor=lightblue]
+	4790717520 -> 4790715616
+	4790717520 [label=TBackward]
+	4790717128 -> 4790717520
+	4790717128 [label="15.weight
+ (1, 100)" fillcolor=lightblue]
+	4790716232 -> 4790716456
+	4790716232 [label="15.bias
+ (1)" fillcolor=lightblue]
+}

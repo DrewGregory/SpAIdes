@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "efcecb75ca331800cacff60242df1420cf1036a3235db9ba87e24f847b2f7cf1"
+            "sha256": "cdc1f0816ca052a4c3f90b62c4a526009549045c6dfa1daaed71bc6e4c0fbaf3"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -121,6 +121,13 @@
                 "sha256:e626c65a8587921ebc7fb8d31a49addfdd0b9a9aa96315ea484c09803337b955"
             ],
             "version": "==2.8.0"
+        },
+        "hickle": {
+            "hashes": [
+                "sha256:a1cb1d79e607ef54710c9e13fd6c8aaf314b42d6d1c49d5422859c30b425b90a"
+            ],
+            "index": "pypi",
+            "version": "==3.2.2"
         },
         "keras-applications": {
             "hashes": [
@@ -297,6 +304,10 @@
                 "sha256:88f9287c0174266bb0d8cedd395cfba9c58e87e5ad86b2ce58859bc11be3cf02"
             ],
             "version": "==2.7.5"
+        },
+        "pytorchviz": {
+            "git": "https://github.com/szagoruyko/pytorchviz",
+            "ref": "b267a9c10143c6bf0c731c2d75d38492fc4c92b0"
         },
         "six": {
             "hashes": [
