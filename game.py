@@ -14,6 +14,10 @@ class Game:
     END_SCORE = 500 - 1
     NUM_PLAYERS = 4
 
+    '''
+    The below configs help setup which player models are in a given game.
+    The default is three baselines, and one ModelTest
+    '''
     def __init__(self, args):
         self.deck = ([Card(i) for i in range(Card.NUM_CARDS)])
         shuffle(self.deck)
@@ -28,7 +32,6 @@ class Game:
             self.players.append(Idiot([], "Idiot"))
         else:
             self.players.append(ModelTest([], "Model Test"))
-            #self.players.append(Baseline([], "Test"))
         shuffle(self.players)
         self.pile = []
 
@@ -102,7 +105,7 @@ class Game:
 
         tricksF = [float(len(c) // 4) for c in playerClaimedCards] # should divide evenly
 
-        #playerBids = [0, 0, 0, 0,] # for training the Trick Winner
+        #playerBids = [0, 0, 0, 0,] # for training the Trick Winner bids are zeroed, otherwise include them
         return playerHandF + claimedF + playerBids +  pileF + tricksF + playerBags + actions
 
     @staticmethod

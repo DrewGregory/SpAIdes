@@ -14,14 +14,13 @@ import utils
 
 class Moderator:
 
-    TEST = 1
-    NUM_GAMES = int(1e8)
+    TEST = 1 # when random.seed uncommented, sets how many possible game configs
+    NUM_GAMES = int(1e8) # number of rounds to simulate: with fixed Q-learning model objectives
     LOGGING = True
 
     
     def __init__(self, args):
         self.game = Game(args)
-       # self.writer = SummaryWriter()
 
 
     def playGame(self):
@@ -35,9 +34,10 @@ class Moderator:
         avgScoreDifferential = []
         model_total = []
         self.roundCursor = 0
-        # while max((Game.END_SCORE,) + tuple([player.score for player in self.players])) == Game.END_SCORE:
         for _ in range(Moderator.NUM_GAMES):
-            #random.seed(_ % Moderator.TEST)
+
+            # used for diagnosing learning issues, restricts to small number of possible configs
+            #random.seed(_ % Moderator.TEST) 
             self.roundCursor = 0
             self.game.deck = [Card(i) for i in range(Card.NUM_CARDS)]
             # Initialize round, deals cards and bids
@@ -53,6 +53,7 @@ class Moderator:
                 playerState = self.game.getPlayerGameState(self.game.players[i], i)
                 self.game.players[i].declareBid(playerState)
 
+                # prints bidding along with scores down below for shell logging
                 if _%100==0:
                     print(self.game.players[i].name , "bid " + str(self.game.players[i].bid))
 
@@ -81,13 +82,11 @@ class Moderator:
                     player = self.game.players[playerIndex]
                     playerState = self.game.getPlayerGameState(player, playerIndex)
                     
-                    reward = 0#( min(player.tricksWon(self.game.NUM_PLAYERS) - player.bid, 0) ) /(13 - numRotations + 1) # default reward for no tricks won
-                   
+                    reward = 0
                     # Give reward for winning, but penalize if it's overbidding
                     if playerIndex == winnerIndex:
                         reward = 1
-                    '''
-                    '''
+
                     player.incorporateFeedback(playerState, reward)
                     
                 self.playerCursor = winnerIndex
@@ -97,7 +96,6 @@ class Moderator:
             ### Logging ####
             if Moderator.LOGGING:
                 mt = [ p for p in self.game.players if p.name=="Model Test"][0]
-                #print("MT BID: " + str(mt.bid))
                 utils.TWriter.add_scalar('data/bid', mt.bid, _)
                 logScores = {}
                 for p in self.game.players:
@@ -111,6 +109,7 @@ class Moderator:
             avgScoreDifferential.append(testScore[2] - bestScore)
             self.roundCursor = self.roundCursor + 1 % self.game.NUM_PLAYERS
             
+            # Shell logging output: for diagnosing scoring issues
             if _ % 100 == 0:
                 if Moderator.LOGGING:
                     mt.save()

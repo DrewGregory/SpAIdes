@@ -129,7 +129,9 @@ class Baseline(Player):
     def playCard(self, state, actions, pile):
         card = None
         if len(pile) == 0:
-            card = actions[0]#random.choice(actions)
+            # chooses first card: still stochasticly random based off shuffling
+            # however, now simulations are reproducible with seeds
+            card = actions[0] 
         else:
             # find highest card
             chosenIndex = 0

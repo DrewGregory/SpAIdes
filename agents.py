@@ -32,7 +32,8 @@ class ModelPlayer(Baseline):
         self.model = model # evaluation function class
         self.actions = actions
         self.bidderModel = BidderModel()
-        #self.bidderModel.load(self.bidderModel.weights, self.bidderModel.optimizer)
+        # use when need to load model, else comment out
+        self.bidderModel.load(self.bidderModel.weights, self.bidderModel.optimizer)
         self.numBids = 1
         self.bidsPerBid = [1] * 14
 
@@ -46,8 +47,6 @@ class ModelPlayer(Baseline):
         bestBid = (float("-inf"),0)
         for i in range(0, 14):
             importantFeatures[52] = i
-            #print(self.bidderModel.predictor(self.bidderModel.weights, \
-            #    torch.tensor(importantFeatures)) + + math.sqrt((2 * math.log(self.numBids))/(self.bidsPerBid[i])))
             bestBid = max(bestBid, (self.bidderModel.predictor(self.bidderModel.weights, \
                 torch.tensor(importantFeatures)) + math.sqrt((2 * math.log(self.numBids))/(self.bidsPerBid[i])), i))
         self.bid = bestBid[1]
@@ -60,11 +59,8 @@ class ModelPlayer(Baseline):
         return self.bid
 
     def calculateScore(self):
-        #simpleScore = super().calculateScore(reset=False, scoreFunction=super().simpleScore)
         score = super().calculateScore()
         loss = self.bidderModel.updater(self.bidderModel.weights, torch.tensor(self.biddingFeatures), score)
-        #print("PREDICTOR: " + str(self.bidderModel.predictor(self.bidderModel.weights, \
-        #        torch.tensor(self.biddingFeatures))) + " SCORE: " + str(score) + " LOSS:" + str(loss))
         utils.TWriter.add_scalar('data/bidLoss' + self.name, loss, self.numBids)
         return score
 
@@ -84,16 +80,11 @@ class ModelPlayer(Baseline):
         self.numiters += 1
         vector_features = self.featureExtractor(state, action)
         # get best action for next state
-        
         nextActions =  self.actions(*game.Game.genActionParams(newState))
-        # print(nextActions)
         nextQs = [(self.getQ(newState, a) , a) for a in nextActions]
         nextBestQ = (max(nextQs))[0] if len(nextQs) > 0 else 0
         target = reward + self.discount * nextBestQ
-        # print("TARGET: " + str(target) + " " + str(reward) + " " + str(nextBestQ))
-        #loss = self.model.update(vector_features, target)
-        #utils.TWriter.add_scalar('data/loss'+self.name, loss, self.numiters)
-
+        
     def playCard(self, state, actions, pile=None):
         # naive UCB
         if random.random() < np.sqrt(float(1 / max(self.numiters, 1))):
@@ -103,7 +94,6 @@ class ModelPlayer(Baseline):
             score, chosen = max([(self.getQ(state,action), action) for action in actions])
         self.hand.remove(chosen)
         self.playHistory.append((state, chosen))
-        # print("MODEL PLAYED:", chosen)
         return chosen
 
 
@@ -141,7 +131,7 @@ class Unflatten(nn.Module):
     def forward(self, x):
         return x.view(1, 1,-1)
 
-
+# generates update lambdas with correct optimizer+criterion+model for QModel class
 def getLambdas(criterion, optimizer, oldweights, weights):
         def pred(weights, features):
             with torch.no_grad():
@@ -185,7 +175,7 @@ class BidderModel:
                 criterion = criterion.cuda()
                 optimizer = optim.Adam(weights.parameters(), lr=1e-3, weight_decay=0)
                 print("cuda'd bidder")
-            self.load(weights, optimizer) #use when need to load old models
+            self.load(weights, optimizer) #use when need to load old models, comment out otherwise
             BidderModel.BIDDER_WEIGHTS = weights
             BidderModel.BIDDER_CRITERION = criterion
     
@@ -195,10 +185,7 @@ class BidderModel:
         self.predictor, self.updater = getLambdas(BidderModel.BIDDER_CRITERION, self.optimizer,
                                                   BidderModel.BIDDER_WEIGHTS, BidderModel.BIDDER_WEIGHTS)
         self.model = QModel(BidderModel.BIDDER_WEIGHTS, self.predictor, self.updater, name="BidderModel")
-        #self.predictor, self.updater = getLambdas(self.criterion, self.optimizer, self.weights, self.weights)
-        #self.model = QModel(self.weights, self.predictor, self.updater, name="BidderModel")
-
-
+        
     def save(self, path="./BidderModel"):
         state = {
             "model": self.weights.state_dict(),
@@ -258,9 +245,6 @@ class ModelTest(ModelPlayer):
             criterion = ModelTest.QMODEL_CRITERION
         else:
 
-
-            
-
             # setup gpu computing
             if cuda.is_available():
                 weights = weights.cuda()
@@ -293,10 +277,6 @@ class ModelTest(ModelPlayer):
         torch.save(state, path)
 
     def load(self, model, optimizer, path="./qmodel"):
-        #deviceName = 'cpu'
-        #if cuda.is_available():
-        #    deviceName = 'cuda'
-        #device = torch.device(deviceName)
         checkpoint = torch.load(path)
         model.load_state_dict(checkpoint['model'])
         optimizer.load_state_dict(checkpoint['optimizer'])

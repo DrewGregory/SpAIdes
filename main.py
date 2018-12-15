@@ -12,7 +12,10 @@ def parseArgs():
 
 
 if __name__ == "__main__":
-    for i in range(10**0):
-        print("\n\n\n\nITERATION ", str(i)+"/"+str(10**0) , " STARTING \n\n\n")
+    # sets how many games to play
+    # each game is Moderator.NUM_GAMES rounds long, with a fixed objective Q-learning model
+    num_games = 10**0
+    for i in range(num_games):
+        print("\n\n\n\nITERATION ", str(i)+"/"+str(num_games) , " STARTING \n\n\n")
         m = Moderator(parseArgs())
         m.playGame()
